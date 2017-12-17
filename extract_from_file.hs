@@ -1,6 +1,7 @@
 import System.IO  
 import System.Directory  
 import Data.List  
+import Data.Char
   
 main = do        
     handle <- openFile "input_file.txt" ReadMode  
@@ -10,6 +11,7 @@ main = do
     putStrLn "These are your house params:"  
     putStr $ (_takeElementAt 2 numberedParams)
 	
+	--map (\x -> read [x]::Int) (filter (\x -> isDigit x) (_takeElementAt 2 numberedParams))
     hClose handle  
 	
 {-main = do  

@@ -32,7 +32,7 @@ _changeAtBasic xs n (y:ys)
 
 
 _processNo :: (Int,Int) -> Int
-_processNo (n,t) = 6 * (n - 1) + t - 1
+_processNo (n,t) = 6 * n  + t
 
 _board :: Int -> char -> [char]
 _board 0 _ = []
@@ -43,6 +43,6 @@ _board n x = x : _board (n-1) x
 main = do
 	--putStrLn (_changeAt (_processNo (1,2)) (_board 36 'x'))
 	
-	putStrLn (reverse (_changeAtBasic (map _processNo [(1,2),(1,3),(5,1)]) 36 (_board 36 'x')))
+	putStrLn (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 'x')))
 	
 	

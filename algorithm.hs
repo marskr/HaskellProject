@@ -43,6 +43,6 @@ _board n x = x : _board (n-1) x
 main = do
 	--putStrLn (_changeAt (_processNo (1,2)) (_board 36 'x'))
 	
-	putStrLn (_changeAtBasic (map _processNo [(1,2),(1,3),(5,1)]) 36 (_board 36 'x'))
+	putStrLn (reverse (_changeAtBasic (map _processNo [(1,2),(1,3),(5,1)]) 36 (_board 36 'x')))
 	
 	

@@ -135,55 +135,98 @@ _procColChoice _ [] = []
 _procColChoice column xs 
 								| column == 0 = (_procCol 6 xs)
 								| otherwise = (_procCol 6 (drop column xs))
-								
 
+-- STEP 2: 						
+-- we' ve got to find out if count of settled warmers is equal to number at the beginning - if yes, other '0' fields will be 'X'						
+_checkIfAllWarmersInRow :: Int -> [Char] -> [Char]
+_checkIfAllWarmersInRow _ [] = []
+_checkIfAllWarmersInRow number xs
+								| number == (_countOfElem 'W' xs) = _changeRowIfEqualWarmers xs
+								| otherwise = xs
+								
+_changeRowIfEqualWarmers :: [Char] -> [Char]
+_changeRowIfEqualWarmers [] = []
+_changeRowIfEqualWarmers (x:xs) 
+								| x == '0' = 'X' : _changeRowIfEqualWarmers xs
+								| otherwise = x : _changeRowIfEqualWarmers xs
+								
 				 
 main = do
 	putStrLn "- 1 - 1 - 2 - 1 - 1 - 1"
 	putStrLn ( unlines ["1","0","2","1","2","1"])
 	
+	let startup_char_board = (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))
+	let startup_int_board = (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)
+	
+	-- STEP1 ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
 	-- First step of project in rows
-	let row_0 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 0 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow False 0 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
-	let row_1 = (_checkEqualityRow 0 (_ereaseIf0AtRow 0 (_ereaseIfNotFitting (_columnToRow False 1 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow False 1 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
-	let row_2 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow False 2 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow False 2 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
-	let row_3 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 3 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow False 3 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
-	let row_4 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow False 4 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow False 4 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
-	let row_5 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 5 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow False 5 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
+	let row_0 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 0 startup_int_board) (_columnToRow False 0 startup_char_board))))
+	let row_1 = (_checkEqualityRow 0 (_ereaseIf0AtRow 0 (_ereaseIfNotFitting (_columnToRow False 1 startup_int_board) (_columnToRow False 1 startup_char_board))))
+	let row_2 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow False 2 startup_int_board) (_columnToRow False 2 startup_char_board))))
+	let row_3 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 3 startup_int_board) (_columnToRow False 3 startup_char_board))))
+	let row_4 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow False 4 startup_int_board) (_columnToRow False 4 startup_char_board))))
+	let row_5 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 5 startup_int_board) (_columnToRow False 5 startup_char_board))))
 	let concatRows = row_0 ++ row_1 ++ row_2 ++ row_3 ++ row_4 ++ row_5
 	
 	-- First step of project in columns
-	let col_0 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 0 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow True 0 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
-	let col_1 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 1 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow True 1 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
-	let col_2 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow True 2 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow True 2 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
-	let col_3 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 3 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow True 3 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
-	let col_4 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 4 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow True 4 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
-	let col_5 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 5 (_placeHousesOnBoard (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)) (_columnToRow True 5 (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))))))
+	let col_0 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 0 startup_int_board) (_columnToRow True 0 startup_char_board))))
+	let col_1 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 1 startup_int_board) (_columnToRow True 1 startup_char_board))))
+	let col_2 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow True 2 startup_int_board) (_columnToRow True 2 startup_char_board))))
+	let col_3 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 3 startup_int_board) (_columnToRow True 3 startup_char_board))))
+	let col_4 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 4 startup_int_board) (_columnToRow True 4 startup_char_board))))
+	let col_5 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 5 startup_int_board) (_columnToRow True 5 startup_char_board))))
 	let concatCols = col_0 ++ col_1 ++ col_2 ++ col_3 ++ col_4 ++ col_5
 	let concatColsProcessed = ((_procColChoice 0 concatCols) ++ (_procColChoice 1 concatCols) ++ (_procColChoice 2 concatCols) ++ (_procColChoice 3 concatCols) ++ (_procColChoice 4 concatCols) ++ (_procColChoice 5 concatCols))
 	
+	-- STEP2 (we' ve got to find out if count of settled warmers is equal to number at the beginning - if yes, other '0' fields will be 'X'): 
+	let rowSTEP2_0 = (_checkIfAllWarmersInRow 1 (_columnToRow False 0 (_impositionRowsCols concatRows concatColsProcessed)))
+	let rowSTEP2_1 = (_checkIfAllWarmersInRow 0 (_columnToRow False 1 (_impositionRowsCols concatRows concatColsProcessed)))
+	let rowSTEP2_2 = (_checkIfAllWarmersInRow 2 (_columnToRow False 2 (_impositionRowsCols concatRows concatColsProcessed)))
+	let rowSTEP2_3 = (_checkIfAllWarmersInRow 1 (_columnToRow False 3 (_impositionRowsCols concatRows concatColsProcessed)))
+	let rowSTEP2_4 = (_checkIfAllWarmersInRow 2 (_columnToRow False 4 (_impositionRowsCols concatRows concatColsProcessed)))
+	let rowSTEP2_5 = (_checkIfAllWarmersInRow 1 (_columnToRow False 5 (_impositionRowsCols concatRows concatColsProcessed)))
+	let concatRowsSTEP2 = rowSTEP2_0 ++ rowSTEP2_1 ++ rowSTEP2_2 ++ rowSTEP2_3 ++ rowSTEP2_4 ++ rowSTEP2_5
 	
-	print concatRows
-	print concatColsProcessed 
+	let colSTEP2_0 = (_checkIfAllWarmersInRow 1 (_columnToRow True 0 (_impositionRowsCols concatRows concatColsProcessed)))
+	let colSTEP2_1 = (_checkIfAllWarmersInRow 1 (_columnToRow True 1 (_impositionRowsCols concatRows concatColsProcessed)))
+	let colSTEP2_2 = (_checkIfAllWarmersInRow 2 (_columnToRow True 2 (_impositionRowsCols concatRows concatColsProcessed)))
+	let colSTEP2_3 = (_checkIfAllWarmersInRow 1 (_columnToRow True 3 (_impositionRowsCols concatRows concatColsProcessed)))
+	let colSTEP2_4 = (_checkIfAllWarmersInRow 1 (_columnToRow True 4 (_impositionRowsCols concatRows concatColsProcessed)))
+	let colSTEP2_5 = (_checkIfAllWarmersInRow 1 (_columnToRow True 5 (_impositionRowsCols concatRows concatColsProcessed)))
+	let concatColsSTEP2 = colSTEP2_0 ++ colSTEP2_1 ++ colSTEP2_2 ++ colSTEP2_3 ++ colSTEP2_4 ++ colSTEP2_5
+	let concatColsProcessedSTEP2 = ((_procColChoice 0 concatColsSTEP2) ++ (_procColChoice 1 concatColsSTEP2) ++ (_procColChoice 2 concatColsSTEP2) ++ (_procColChoice 3 concatColsSTEP2) ++ (_procColChoice 4 concatColsSTEP2) ++ (_procColChoice 5 concatColsSTEP2))
 	
-	print (_impositionRowsCols concatRows concatColsProcessed)
-	{-putStrLn "Normal board view:"
+	
+	--print concatRows
+	--print concatColsProcessed 
+	
+	print (_impositionRowsCols concatRowsSTEP2 concatColsProcessedSTEP2)
+	putStrLn "Normal board view:"
 	putStrLn ""
-	print row_0 
-	print row_1
+	putStrLn rowSTEP2_0
+	putStrLn rowSTEP2_1
+	putStrLn rowSTEP2_2
+	putStrLn rowSTEP2_3
+	putStrLn rowSTEP2_4
+	putStrLn rowSTEP2_5
+	
+	{-print row_1
 	print row_2
 	print row_3
 	print row_4 
-	print row_5	
+	print row_5	-}
 
 	putStrLn "" 
 	putStrLn "Pivoted board view:"
 	putStrLn ""
-	print col_0
-	print col_1
-	print col_2
-	print col_3
-	print col_4
-	print col_5-}
+	putStrLn colSTEP2_0
+	putStrLn colSTEP2_1
+	putStrLn colSTEP2_2
+	putStrLn colSTEP2_3
+	putStrLn colSTEP2_4
+	putStrLn colSTEP2_5
+
+
 	
 	
 	

@@ -210,90 +210,126 @@ main = do
 	putStrLn "- 1 - 1 - 2 - 1 - 1 - 1"
 	putStrLn ( unlines ["1","0","2","1","2","1"])
 	
-	let startup_char_board = (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0')))
-	let startup_int_board = (_placeHousesOnBoard 7 (_numberBoard 36) (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0) 0)
-	let startup_int_board2 = (_placeHousesOnBoard 3 (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)) 0)
+	let tuple_from_file = [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]
+	let left_numbers_from_file = [ 1, 0, 2, 1, 2, 1 ]
+	let up_numbers_from_file = [ 1, 1, 2, 1, 1, 1 ] 
+	
+	let startup_char_board = (reverse (_changeAtBasic (map _processNo tuple_from_file) 35 (_board 36 '0')))
+	let startup_int_board = (_placeHousesOnBoard 7 (_numberBoard 36) (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) 35 (_board 36 '0'))) 0) 0)
+	let startup_int_board2 = (_placeHousesOnBoard 3 (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) 35 (_board 36 '0'))) 0)) 0)
 	let joined_int_boards = _joinLists startup_int_board startup_int_board2
-	let house_index_list = (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]) 35 (_board 36 '0'))) 0)
+	let house_index_list = (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) 35 (_board 36 '0'))) 0)
 	--print startup_int_board
 	--print startup_int_board2
 	--print joined_int_boards
 	
-	-- STEP1 ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
+	-- STEP0 ereasing rows and columns with 0 number 
+	let rowSTEP0_0 = (_ereaseIf0AtRow 1 (_columnToRow False 0 startup_char_board))
+	let rowSTEP0_1 = (_ereaseIf0AtRow 0 (_columnToRow False 1 startup_char_board))
+	let rowSTEP0_2 = (_ereaseIf0AtRow 2 (_columnToRow False 2 startup_char_board))
+	let rowSTEP0_3 = (_ereaseIf0AtRow 1 (_columnToRow False 3 startup_char_board))
+	let rowSTEP0_4 = (_ereaseIf0AtRow 2 (_columnToRow False 4 startup_char_board))
+	let rowSTEP0_5 = (_ereaseIf0AtRow 1 (_columnToRow False 5 startup_char_board))
+	let concatRowsSTEP0 = rowSTEP0_0 ++ rowSTEP0_1 ++ rowSTEP0_2 ++ rowSTEP0_3 ++ rowSTEP0_4 ++ rowSTEP0_5
+	
+	let colSTEP0_0 = (_ereaseIf0AtRow 1 (_columnToRow True 0 startup_char_board))
+	let colSTEP0_1 = (_ereaseIf0AtRow 1 (_columnToRow True 1 startup_char_board))
+	let colSTEP0_2 = (_ereaseIf0AtRow 2 (_columnToRow True 2 startup_char_board))
+	let colSTEP0_3 = (_ereaseIf0AtRow 1 (_columnToRow True 3 startup_char_board))
+	let colSTEP0_4 = (_ereaseIf0AtRow 1 (_columnToRow True 4 startup_char_board))
+	let colSTEP0_5 = (_ereaseIf0AtRow 1 (_columnToRow True 5 startup_char_board))
+	let concatColsSTEP0 = colSTEP0_0 ++ colSTEP0_1 ++ colSTEP0_2 ++ colSTEP0_3 ++ colSTEP0_4 ++ colSTEP0_5
+	let concatColsProcessedSTEP0 = ((_procColChoice 0 concatColsSTEP0) ++ (_procColChoice 1 concatColsSTEP0) ++ (_procColChoice 2 concatColsSTEP0) ++ (_procColChoice 3 concatColsSTEP0) ++ (_procColChoice 4 concatColsSTEP0) ++ (_procColChoice 5 concatColsSTEP0))
+	
+	let resultSTEP0 = (_impositionRowsCols concatRowsSTEP0 concatColsProcessedSTEP0)
+	print concatRowsSTEP0
+	print concatColsProcessedSTEP0
+	print resultSTEP0
+	
+	print " "
+	print "END OF STEP 0!"
+	print " " 
+	
+	-- STEP1 ereasing cells which are on the edges for hauses & placing warmers if numbers at row/col beginning are the same
 	-- First step of project in rows
-	let row_0 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 0 joined_int_boards) (_columnToRow False 0 startup_char_board))))
-	let row_1 = (_checkEqualityRow 0 (_ereaseIf0AtRow 0 (_ereaseIfNotFitting (_columnToRow False 1 joined_int_boards) (_columnToRow False 1 startup_char_board))))
-	let row_2 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow False 2 joined_int_boards) (_columnToRow False 2 startup_char_board))))
-	let row_3 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 3 joined_int_boards) (_columnToRow False 3 startup_char_board))))
-	let row_4 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow False 4 joined_int_boards) (_columnToRow False 4 startup_char_board))))
-	let row_5 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 5 joined_int_boards) (_columnToRow False 5 startup_char_board))))
-	let concatRows = row_0 ++ row_1 ++ row_2 ++ row_3 ++ row_4 ++ row_5
+	let rowSTEP1_0 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow False 0 joined_int_boards) (_columnToRow False 0 resultSTEP0)))
+	let rowSTEP1_1 = (_checkEqualityRow 0 (_ereaseIfNotFitting (_columnToRow False 1 joined_int_boards) (_columnToRow False 1 resultSTEP0)))
+	let rowSTEP1_2 = (_checkEqualityRow 2 (_ereaseIfNotFitting (_columnToRow False 2 joined_int_boards) (_columnToRow False 2 resultSTEP0)))
+	let rowSTEP1_3 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow False 3 joined_int_boards) (_columnToRow False 3 resultSTEP0)))
+	let rowSTEP1_4 = (_checkEqualityRow 2 (_ereaseIfNotFitting (_columnToRow False 4 joined_int_boards) (_columnToRow False 4 resultSTEP0)))
+	let rowSTEP1_5 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow False 5 joined_int_boards) (_columnToRow False 5 resultSTEP0)))
+	let concatRowsSTEP1 = rowSTEP1_0 ++ rowSTEP1_1 ++ rowSTEP1_2 ++ rowSTEP1_3 ++ rowSTEP1_4 ++ rowSTEP1_5
 	
 	-- First step of project in columns
-	let col_0 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 0 joined_int_boards) (_columnToRow True 0 startup_char_board))))
-	let col_1 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 1 joined_int_boards) (_columnToRow True 1 startup_char_board))))
-	let col_2 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow True 2 joined_int_boards) (_columnToRow True 2 startup_char_board))))
-	let col_3 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 3 joined_int_boards) (_columnToRow True 3 startup_char_board))))
-	let col_4 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 4 joined_int_boards) (_columnToRow True 4 startup_char_board))))
-	let col_5 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 5 joined_int_boards) (_columnToRow True 5 startup_char_board))))
-	let concatCols = col_0 ++ col_1 ++ col_2 ++ col_3 ++ col_4 ++ col_5
-	let concatColsProcessed = ((_procColChoice 0 concatCols) ++ (_procColChoice 1 concatCols) ++ (_procColChoice 2 concatCols) ++ (_procColChoice 3 concatCols) ++ (_procColChoice 4 concatCols) ++ (_procColChoice 5 concatCols))
+	let colSTEP1_0 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow True 0 joined_int_boards) (_columnToRow True 0 resultSTEP0)))
+	let colSTEP1_1 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow True 1 joined_int_boards) (_columnToRow True 1 resultSTEP0)))
+	let colSTEP1_2 = (_checkEqualityRow 2 (_ereaseIfNotFitting (_columnToRow True 2 joined_int_boards) (_columnToRow True 2 resultSTEP0)))
+	let colSTEP1_3 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow True 3 joined_int_boards) (_columnToRow True 3 resultSTEP0)))
+	let colSTEP1_4 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow True 4 joined_int_boards) (_columnToRow True 4 resultSTEP0)))
+	let colSTEP1_5 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow True 5 joined_int_boards) (_columnToRow True 5 resultSTEP0)))
+	let concatColsSTEP1 = colSTEP1_0 ++ colSTEP1_1 ++ colSTEP1_2 ++ colSTEP1_3 ++ colSTEP1_4 ++ colSTEP1_5
+	let concatColsProcessedSTEP1 = ((_procColChoice 0 concatColsSTEP1) ++ (_procColChoice 1 concatColsSTEP1) ++ (_procColChoice 2 concatColsSTEP1) ++ (_procColChoice 3 concatColsSTEP1) ++ (_procColChoice 4 concatColsSTEP1) ++ (_procColChoice 5 concatColsSTEP1))
+	
+	let resultSTEP1 = (_impositionRowsCols concatRowsSTEP1 concatColsProcessedSTEP1)
+	print concatRowsSTEP1
+	print concatColsProcessedSTEP1
+	print resultSTEP1
+	
+	print " "
+	print "END OF STEP 1!"
+	print " " 
 	
 	-- STEP2 (we' ve got to find out if count of settled warmers is equal to number at the beginning - if yes, other '0' fields will be 'X'): 
-	let rowSTEP2_0 = (_checkIfAllWarmersInRow 1 (_columnToRow False 0 (_impositionRowsCols concatRows concatColsProcessed)))
-	let rowSTEP2_1 = (_checkIfAllWarmersInRow 0 (_columnToRow False 1 (_impositionRowsCols concatRows concatColsProcessed)))
-	let rowSTEP2_2 = (_checkIfAllWarmersInRow 2 (_columnToRow False 2 (_impositionRowsCols concatRows concatColsProcessed)))
-	let rowSTEP2_3 = (_checkIfAllWarmersInRow 1 (_columnToRow False 3 (_impositionRowsCols concatRows concatColsProcessed)))
-	let rowSTEP2_4 = (_checkIfAllWarmersInRow 2 (_columnToRow False 4 (_impositionRowsCols concatRows concatColsProcessed)))
-	let rowSTEP2_5 = (_checkIfAllWarmersInRow 1 (_columnToRow False 5 (_impositionRowsCols concatRows concatColsProcessed)))
+	let rowSTEP2_0 = (_checkIfAllWarmersInRow 1 (_columnToRow False 0 resultSTEP1))
+	let rowSTEP2_1 = (_checkIfAllWarmersInRow 0 (_columnToRow False 1 resultSTEP1))
+	let rowSTEP2_2 = (_checkIfAllWarmersInRow 2 (_columnToRow False 2 resultSTEP1))
+	let rowSTEP2_3 = (_checkIfAllWarmersInRow 1 (_columnToRow False 3 resultSTEP1))
+	let rowSTEP2_4 = (_checkIfAllWarmersInRow 2 (_columnToRow False 4 resultSTEP1))
+	let rowSTEP2_5 = (_checkIfAllWarmersInRow 1 (_columnToRow False 5 resultSTEP1))
 	let concatRowsSTEP2 = rowSTEP2_0 ++ rowSTEP2_1 ++ rowSTEP2_2 ++ rowSTEP2_3 ++ rowSTEP2_4 ++ rowSTEP2_5
 	
-	let colSTEP2_0 = (_checkIfAllWarmersInRow 1 (_columnToRow True 0 (_impositionRowsCols concatRows concatColsProcessed)))
-	let colSTEP2_1 = (_checkIfAllWarmersInRow 1 (_columnToRow True 1 (_impositionRowsCols concatRows concatColsProcessed)))
-	let colSTEP2_2 = (_checkIfAllWarmersInRow 2 (_columnToRow True 2 (_impositionRowsCols concatRows concatColsProcessed)))
-	let colSTEP2_3 = (_checkIfAllWarmersInRow 1 (_columnToRow True 3 (_impositionRowsCols concatRows concatColsProcessed)))
-	let colSTEP2_4 = (_checkIfAllWarmersInRow 1 (_columnToRow True 4 (_impositionRowsCols concatRows concatColsProcessed)))
-	let colSTEP2_5 = (_checkIfAllWarmersInRow 1 (_columnToRow True 5 (_impositionRowsCols concatRows concatColsProcessed)))
+	let colSTEP2_0 = (_checkIfAllWarmersInRow 1 (_columnToRow True 0 resultSTEP1))
+	let colSTEP2_1 = (_checkIfAllWarmersInRow 1 (_columnToRow True 1 resultSTEP1))
+	let colSTEP2_2 = (_checkIfAllWarmersInRow 2 (_columnToRow True 2 resultSTEP1))
+	let colSTEP2_3 = (_checkIfAllWarmersInRow 1 (_columnToRow True 3 resultSTEP1))
+	let colSTEP2_4 = (_checkIfAllWarmersInRow 1 (_columnToRow True 4 resultSTEP1))
+	let colSTEP2_5 = (_checkIfAllWarmersInRow 1 (_columnToRow True 5 resultSTEP1))
 	let concatColsSTEP2 = colSTEP2_0 ++ colSTEP2_1 ++ colSTEP2_2 ++ colSTEP2_3 ++ colSTEP2_4 ++ colSTEP2_5
 	let concatColsProcessedSTEP2 = ((_procColChoice 0 concatColsSTEP2) ++ (_procColChoice 1 concatColsSTEP2) ++ (_procColChoice 2 concatColsSTEP2) ++ (_procColChoice 3 concatColsSTEP2) ++ (_procColChoice 4 concatColsSTEP2) ++ (_procColChoice 5 concatColsSTEP2))
 	
+	let resultSTEP2 = (_impositionRowsCols concatRowsSTEP2 concatColsProcessedSTEP2)
 	
-	--print concatRows
-	--print concatColsProcessed 
+	print concatRowsSTEP2
+	print concatColsProcessedSTEP2 
+	print resultSTEP2
+	
+	print " "
+	print "END OF STEP 2!"
+	print " " 
+	
 	-- STEP3 erease cells at the edges of warmers
-	let warmersList = _ereaseByWarmers 0 (_ereaseByWarmersList 6 (_makeWarmersIndexList 0 (_impositionRowsCols concatRowsSTEP2 concatColsProcessedSTEP2))) (_impositionRowsCols concatRowsSTEP2 concatColsProcessedSTEP2)	
+	let resultSTEP3 = _ereaseByWarmers 0 (_ereaseByWarmersList 6 (_makeWarmersIndexList 0 resultSTEP2)) resultSTEP2	
 
-	{-let rowLASTSTEP_0 = (_columnToRow False 0 warmersList)
-	let rowLASTSTEP_1 = (_columnToRow False 1 warmersList)
-	let rowLASTSTEP_2 = (_columnToRow False 2 warmersList)
-	let rowLASTSTEP_3 = (_columnToRow False 3 warmersList)
-	let rowLASTSTEP_4 = (_columnToRow False 4 warmersList)
-	let rowLASTSTEP_5 = (_columnToRow False 5 warmersList)
-	
-	let colLASTSTEP_0 = (_columnToRow True 0 warmersList)
-	let colLASTSTEP_1 = (_columnToRow True 1 warmersList)
-	let colLASTSTEP_2 = (_columnToRow True 2 warmersList)
-	let colLASTSTEP_3 = (_columnToRow True 3 warmersList)
-	let colLASTSTEP_4 = (_columnToRow True 4 warmersList)
-	let colLASTSTEP_5 = (_columnToRow True 5 warmersList)-}
+	print "warmerList:"
+	print resultSTEP3
 	
 	-- STEP4 once again STEP1
-	-- First step of project in rows
-	let rowLASTSTEP_0 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 0 joined_int_boards) (_columnToRow False 0 warmersList))))
-	let rowLASTSTEP_1 = (_checkEqualityRow 0 (_ereaseIf0AtRow 0 (_ereaseIfNotFitting (_columnToRow False 1 joined_int_boards) (_columnToRow False 1 warmersList))))
-	let rowLASTSTEP_2 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow False 2 joined_int_boards) (_columnToRow False 2 warmersList))))
-	let rowLASTSTEP_3 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 3 joined_int_boards) (_columnToRow False 3 warmersList))))
-	let rowLASTSTEP_4 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow False 4 joined_int_boards) (_columnToRow False 4 warmersList))))
-	let rowLASTSTEP_5 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 5 joined_int_boards) (_columnToRow False 5 warmersList))))
+	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
+	{-let rowLASTSTEP_0 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 0 joined_int_boards) (_columnToRow False 0 resultSTEP3))))
+	let rowLASTSTEP_1 = (_checkEqualityRow 0 (_ereaseIf0AtRow 0 (_ereaseIfNotFitting (_columnToRow False 1 joined_int_boards) (_columnToRow False 1 resultSTEP3))))
+	let rowLASTSTEP_2 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow False 2 joined_int_boards) (_columnToRow False 2 resultSTEP3))))
+	let rowLASTSTEP_3 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 3 joined_int_boards) (_columnToRow False 3 resultSTEP3))))
+	let rowLASTSTEP_4 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow False 4 joined_int_boards) (_columnToRow False 4 resultSTEP3))))
+	let rowLASTSTEP_5 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow False 5 joined_int_boards) (_columnToRow False 5 resultSTEP3))))
 	let concatRowsSTEP3 = rowLASTSTEP_0 ++ rowLASTSTEP_1 ++ rowLASTSTEP_2 ++ rowLASTSTEP_3 ++ rowLASTSTEP_4 ++ rowLASTSTEP_5
 	
-	-- First step of project in columns
-	let colLASTSTEP_0 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 0 joined_int_boards) (_columnToRow True 0 warmersList))))
-	let colLASTSTEP_1 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 1 joined_int_boards) (_columnToRow True 1 warmersList))))
-	let colLASTSTEP_2 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow True 2 joined_int_boards) (_columnToRow True 2 warmersList))))
-	let colLASTSTEP_3 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 3 joined_int_boards) (_columnToRow True 3 warmersList))))
-	let colLASTSTEP_4 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 4 joined_int_boards) (_columnToRow True 4 warmersList))))
-	let colLASTSTEP_5 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 5 joined_int_boards) (_columnToRow True 5 warmersList))))
+	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
+	let colLASTSTEP_0 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 0 joined_int_boards) (_columnToRow True 0 resultSTEP3))))
+	let colLASTSTEP_1 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 1 joined_int_boards) (_columnToRow True 1 resultSTEP3))))
+	let colLASTSTEP_2 = (_checkEqualityRow 2 (_ereaseIf0AtRow 2 (_ereaseIfNotFitting (_columnToRow True 2 joined_int_boards) (_columnToRow True 2 resultSTEP3))))
+	let colLASTSTEP_3 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 3 joined_int_boards) (_columnToRow True 3 resultSTEP3))))
+	let colLASTSTEP_4 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 4 joined_int_boards) (_columnToRow True 4 resultSTEP3))))
+	let colLASTSTEP_5 = (_checkEqualityRow 1 (_ereaseIf0AtRow 1 (_ereaseIfNotFitting (_columnToRow True 5 joined_int_boards) (_columnToRow True 5 resultSTEP3))))
 	let concatColsSTEP3 = colLASTSTEP_0 ++ colLASTSTEP_1 ++ colLASTSTEP_2 ++ colLASTSTEP_3 ++ colLASTSTEP_4 ++ colLASTSTEP_5
 	let concatColsProcessedSTEP3 = ((_procColChoice 0 concatColsSTEP3) ++ (_procColChoice 1 concatColsSTEP3) ++ (_procColChoice 2 concatColsSTEP3) ++ (_procColChoice 3 concatColsSTEP3) ++ (_procColChoice 4 concatColsSTEP3) ++ (_procColChoice 5 concatColsSTEP3))
 	
@@ -321,11 +357,11 @@ main = do
 	putStrLn rowLASTSTEP_4
 	putStrLn rowLASTSTEP_5
 	
-	{-print row_1
-	print row_2
-	print row_3
-	print row_4 
-	print row_5	-}
+	{-print rowSTEP1_1
+	print rowSTEP1_2
+	print rowSTEP1_3
+	print rowSTEP1_4 
+	print rowSTEP1_5	-}
 
 	putStrLn "" 
 	putStrLn "Pivoted board view:"
@@ -335,7 +371,7 @@ main = do
 	putStrLn colLASTSTEP_2
 	putStrLn colLASTSTEP_3
 	putStrLn colLASTSTEP_4
-	putStrLn colLASTSTEP_5-}
+	putStrLn colLASTSTEP_5-}-}
 
 
 	

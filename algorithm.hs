@@ -1,5 +1,21 @@
 import Data.List
+import Data.Char
+import System.IO  
+import System.Directory    
+import Control.Monad
 
+-- file data extraction
+f :: [String] -> [Int]
+f = map read
+
+byTwos :: [a] -> [(a,a)]
+byTwos [] = []
+byTwos xs = zip firsts seconds 
+    where enumerated = zip xs [1..]
+          firsts     = [fst x | x <- enumerated, odd $ snd x]
+          seconds    = [fst x | x <- enumerated, even $ snd x]
+-- end of data extraction
+		  
 -- check if in table exist provided item
 _checkIfExist :: [Int] -> Int -> Bool
 _checkIfExist [] _ = False
@@ -227,8 +243,24 @@ _placeIfCellEquals4 (x:xs) (y:ys)
 
 								
 main = do
-	putStrLn "- 1 - 1 - 2 - 1 - 1 - 1"
-	putStrLn ( unlines ["1","0","2","1","2","1"])
+	--putStrLn "- 1 - 1 - 2 - 1 - 1 - 1"
+	--putStrLn ( unlines ["1","0","2","1","2","1"])
+	
+	handle <- openFile "input_file.txt" ReadMode
+        contents <- hGetContents handle
+        let singlewords = lines contents
+            --numberedParams = zipWith (\n line -> line) [0..] singlewords
+        let list = f (words (singlewords!!0))
+        let listb = f (words (singlewords!!1))
+        let tuple_from_file2 = byTwos ( f (words (singlewords!!2)))
+		
+        --print tuple_from_file2
+        --print listb
+        --print tuple_from_file
+		
+        hClose handle 
+		
+	--print listc
 	
 	let tuple_from_file = [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]
 	let left_numbers_from_file = [ 1, 0, 2, 1, 2, 1 ]
@@ -472,6 +504,7 @@ main = do
 	print "END OF STEP 6!"
 	print " " 
 	-}
+	
 
 
 	

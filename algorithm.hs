@@ -20,8 +20,8 @@ byTwos xs = zip firsts seconds
 _checkIfExist :: [Int] -> Int -> Bool
 _checkIfExist [] _ = False
 _checkIfExist (x:xs) n 
-						| x == n = True
-						| otherwise = _checkIfExist xs n
+								| x == n = True
+								| otherwise = _checkIfExist xs n
 
 	-- [Lista miejsc do zmiany] -> maksymalny elem na liscie ->
 	-- [Lista charów zmienianych] -> wynik (board) 
@@ -29,8 +29,8 @@ _checkIfExist (x:xs) n
 _changeAtBasic :: [Int] -> Int -> [Char] -> [Char]
 _changeAtBasic _ _ [] = [] 
 _changeAtBasic xs n (y:ys)
-						| _checkIfExist xs n == True = 'H' : _changeAtBasic xs (n-1) ys
-						| otherwise = y : _changeAtBasic xs (n-1) ys
+								| _checkIfExist xs n == True = 'H' : _changeAtBasic xs (n-1) ys
+								| otherwise = y : _changeAtBasic xs (n-1) ys
 
 _processNo :: Int -> (Int, Int) -> Int
 _processNo dim (n,t) = dim * n + t
@@ -44,21 +44,21 @@ _board n x = x : _board (n-1) x
 _ereaseIf0AtRow :: Int -> [Char] -> [Char]
 _ereaseIf0AtRow _ [] = []
 _ereaseIf0AtRow n (x:xs) 
-						| n == 0 && x == '0' = 'X' : _ereaseIf0AtRow n xs
-						| otherwise = x : _ereaseIf0AtRow n xs
+								| n == 0 && x == '0' = 'X' : _ereaseIf0AtRow n xs
+								| otherwise = x : _ereaseIf0AtRow n xs
 				  
 -- creation of number board 				
 _numberBoard :: Int -> [Int]
 _numberBoard n =  sub 0
-			where sub i | i >= n =  []
-						| otherwise = 0 : sub (i + 1)
+					where sub i | i >= n =  []
+								| otherwise = 0 : sub (i + 1)
 						
 						-- list numberBoard | list of house indexes
 _placeHousesOnBoard :: Int -> [Int] -> [Int] -> Int -> [Int]
 _placeHousesOnBoard _ [] _ _ = []
 _placeHousesOnBoard wage (x:xs) ys index	
-						| (_checkIfExist ys index) = (x + wage) : _placeHousesOnBoard wage xs ys (index + 1)
-						| otherwise = x : _placeHousesOnBoard wage xs ys (index + 1)
+								| (_checkIfExist ys index) = (x + wage) : _placeHousesOnBoard wage xs ys (index + 1)
+								| otherwise = x : _placeHousesOnBoard wage xs ys (index + 1)
 
 _makeHousesIndexList :: [Char] -> Int -> [Int]
 _makeHousesIndexList [] _ = []

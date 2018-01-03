@@ -114,18 +114,18 @@ _countWarmersInRow (x:xs)
 -- provide column/row values as a list of elements, bool to chose if column or row
 _columnToRow :: Int -> Bool -> Int -> [a] -> [a]								
 _columnToRow _ _ _ [] = []
-_columnToRow dim rowOrCol number xs = _iteratingThroughTab rowOrCol number 0 xs [0, dim..(dim-1)*dim] [0, 1..(dim-1)]
+_columnToRow dim rowOrCol number xs = _iteratingThroughTab dim rowOrCol number 0 xs [0, dim..(dim-1)*dim] [0, 1..(dim-1)]
 
-_iteratingThroughTab :: Bool -> Int ->  Int -> [a] -> [Int] -> [Int] -> [a]
-_iteratingThroughTab _ _ _ [] _ _ = []						
-_iteratingThroughTab rowOrCol number iterator (x:xs) ys zs
-								| (_checkIfExist (_genIndexInColList rowOrCol number ys zs) iterator) = x : _iteratingThroughTab rowOrCol number (iterator + 1) xs ys zs
-								| otherwise = _iteratingThroughTab rowOrCol number (iterator + 1) xs ys zs
+_iteratingThroughTab :: Int -> Bool -> Int ->  Int -> [a] -> [Int] -> [Int] -> [a]
+_iteratingThroughTab _ _ _ _ [] _ _ = []						
+_iteratingThroughTab dim rowOrCol number iterator (x:xs) ys zs
+								| (_checkIfExist (_genIndexInColList dim rowOrCol number ys zs) iterator) = x : _iteratingThroughTab dim rowOrCol number (iterator + 1) xs ys zs
+								| otherwise = _iteratingThroughTab dim rowOrCol number (iterator + 1) xs ys zs
 
-_genIndexInColList :: Bool -> Int -> [Int] -> [Int] -> [Int]
-_genIndexInColList rowOrCol number xs ys
+_genIndexInColList :: Int -> Bool -> Int -> [Int] -> [Int] -> [Int]
+_genIndexInColList dim rowOrCol number xs ys
 								| rowOrCol == True = [ x + number | x <- xs ] -- x <- [ 0, 6, 12, 18, 24, 30 ] ]
-								| otherwise = [ x + number * 6 | x <- ys ] -- x <- [ 0, 1, 2, 3, 4, 5 ] ]
+								| otherwise = [ x + number * dim | x <- ys ] -- x <- [ 0, 1, 2, 3, 4, 5 ] ]
 -- end of showing board by index
 
 -- the rows and columns imposition
@@ -291,17 +291,17 @@ main = do
 		
         hClose handle 
 	
-	--let tuple_from_file = [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]
-	--let left_numbers_from_file = [1,0,2,1,2,1]
-	--let up_numbers_from_file = [1,1,2,1,1,1] 
+	let tuple_from_file = [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]
+	let left_numbers_from_file = [1,0,2,1,2,1]
+	let up_numbers_from_file = [1,1,2,1,1,1] 
 	
-	let tuple_from_file = [(0,4),(1,1),(1,3),(1,5),(2,2),(3,0),(4,2),(5,5)]
-	let left_numbers_from_file = [2,0,3,0,2,1]
-	let up_numbers_from_file = [1,1,1,2,0,3] 
+	--let tuple_from_file = [(0,4),(1,1),(1,3),(1,5),(2,2),(3,0),(4,2),(5,5)]
+	--let left_numbers_from_file = [2,0,3,0,2,1]
+	--let up_numbers_from_file = [1,1,1,2,0,3] 
 	
-	--let tuple_from_file = [(0,6),(1,4),(4,2),(5,0)]
-	--let left_numbers_from_file = [1,1,0,1,0,1,0]
-	--let up_numbers_from_file = [0,1,1,0,1,0,1] 
+	--let tuple_from_file = [(0,4),(3,1),(4,3),(5,0),(5,2),(5,4),(5,5),(5,6),(6,4)]
+	--let left_numbers_from_file = [1,0,1,1,3,1,2]
+	--let up_numbers_from_file = [1,2,0,2,1,2,1] 
 	
 	let board_dim_1 = length left_numbers_from_file
 	let board_dim_2 = length up_numbers_from_file
@@ -449,6 +449,7 @@ main = do
 	putStrLn (_columnToRow board_dim_1 False 3 resultSTEP7)
 	putStrLn (_columnToRow board_dim_1 False 4 resultSTEP7)
 	putStrLn (_columnToRow board_dim_1 False 5 resultSTEP7)
+	--putStrLn (_columnToRow board_dim_1 False 6 resultSTEP7)
 	
 	{-print " "
 	print "END OF STEP 7!"

@@ -224,8 +224,8 @@ _iterateThroughBoard iterator house_index wage (z:zs)
 								| iterator == house_index = (z + wage) : (_iterateThroughBoard (iterator + 1) house_index wage zs)
 								| iterator == house_index - 6 = (z + wage) : (_iterateThroughBoard (iterator + 1) house_index wage zs)
 								| iterator == house_index - 1 = (z + wage) : (_iterateThroughBoard (iterator + 1) house_index wage zs)
-								| iterator == house_index + 1= (z + wage) : (_iterateThroughBoard (iterator + 1) house_index wage zs)
-								| iterator == house_index + 6= (z + wage) : (_iterateThroughBoard (iterator + 1) house_index wage zs)
+								| iterator == house_index + 1 = (z + wage) : (_iterateThroughBoard (iterator + 1) house_index wage zs)
+								| iterator == house_index + 6 = (z + wage) : (_iterateThroughBoard (iterator + 1) house_index wage zs)
 								| otherwise = z : (_iterateThroughBoard (iterator + 1) house_index wage zs)
 
 -- now there will be used method that checks int board and char board - it will erease number if on board field will be item other than 'H' or '0'
@@ -241,7 +241,39 @@ _placeIfCellEquals4 (x:xs) (y:ys)
 								| x == 4 && y == '0' = 'W' : _placeIfCellEquals4 xs ys
 								| otherwise = y : _placeIfCellEquals4 xs ys 
 
-								
+{--- here will be placed generic transformation part - naive version will be changed into generic one ---}
+{--- STEP0 ---}
+_genericStep0RowsOrCols :: Bool -> [Int] -> [Int] -> [Char] -> [Char]	
+_genericStep0RowsOrCols _ [] [] _ = []							
+_genericStep0RowsOrCols choice (x:xs) (y:ys) zs = (_ereaseIf0AtRow x (_columnToRow choice y zs)) ++ (_genericStep0RowsOrCols choice xs ys zs)
+-- choice - if choice false = ROWS, if choice true = COLUMNS
+
+_concatColsProcessed :: [Int] -> [Char] -> [Char]
+_concatColsProcessed [] _ = []
+_concatColsProcessed (x:xs) ys = (_procColChoice x ys) ++ (_concatColsProcessed xs ys)				
+			
+{--- STEP1 ---}	
+-- _checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow False 0 int_board_with_wagesSTEP0) (_columnToRow False 0 resultSTEP0))
+_genericEreasingHousesAndPlacingWarmers :: Bool -> [Int] -> [Int] -> [Int] -> [Char] -> [Char]	
+_genericEreasingHousesAndPlacingWarmers _ [] [] _ _ = []							
+_genericEreasingHousesAndPlacingWarmers choice (x:xs) (y:ys) zs ts = (_checkEqualityRow x (_ereaseIfNotFitting (_columnToRow choice y zs) (_columnToRow choice y ts))) ++ (_genericEreasingHousesAndPlacingWarmers choice xs ys zs ts)	
+
+{--- STEP2 | STEP6 ---}
+-- _checkIfAllWarmersInRow 1 (_columnToRow False 0 resultSTEP1)
+_genericCheckIfAllWarmers :: Bool -> [Int] -> [Int] -> [Char] -> [Char]	
+_genericCheckIfAllWarmers _ [] [] _ = []
+_genericCheckIfAllWarmers choice (x:xs) (y:ys) zs = (_checkIfAllWarmersInRow x (_columnToRow choice y zs)) ++ (_genericCheckIfAllWarmers choice xs ys zs)
+			
+{--- STEP4 ---}			
+-- _checkEqualityRow (1 - _countWarmersInRow (_columnToRow False 0 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow False 0 joined_int_boards) (_columnToRow False 0 resultSTEP3))
+_genericEreasingHouAndWarmAdditional :: Bool -> [Int] -> [Int] -> [Int] -> [Char] -> [Char]	
+_genericEreasingHouAndWarmAdditional _ [] [] _ _ = [] 
+_genericEreasingHouAndWarmAdditional choice (x:xs) (y:ys) zs ts = (_checkEqualityRow (x - _countWarmersInRow (_columnToRow choice y ts)) (_ereaseIfNotFitting (_columnToRow choice y zs) (_columnToRow choice y ts))) ++ (_genericEreasingHouAndWarmAdditional choice xs ys zs ts)
+
+{--- Additional ---}
+-- putStrLn (_columnToRow False 0 resultSTEP7)
+		
+			
 main = do
 	--putStrLn "- 1 - 1 - 2 - 1 - 1 - 1"
 	--putStrLn ( unlines ["1","0","2","1","2","1"])
@@ -259,39 +291,35 @@ main = do
         --print tuple_from_file
 		
         hClose handle 
-		
-	--print listc
 	
 	let tuple_from_file = [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]
-	let left_numbers_from_file = [ 1, 0, 2, 1, 2, 1 ]
-	let up_numbers_from_file = [ 1, 1, 2, 1, 1, 1 ] 
+	let left_numbers_from_file = [1,0,2,1,2,1]
+	let up_numbers_from_file = [1,1,2,1,1,1] 
 	
-	let startup_char_board = (reverse (_changeAtBasic (map _processNo tuple_from_file) 35 (_board 36 '0')))
-	let startup_int_board = (_placeHousesOnBoard 7 (_numberBoard 36) (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) 35 (_board 36 '0'))) 0) 0)
-	let startup_int_board2 = (_placeHousesOnBoard 3 (_numberBoard 36) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) 35 (_board 36 '0'))) 0)) 0)
+	let board_dim_1 = length left_numbers_from_file
+	let board_dim_2 = length up_numbers_from_file
+	let board_size = board_dim_1 * board_dim_2
+	let rows_list = [0..board_dim_1-1]
+	let cols_list = [0..board_dim_2-1]
+	
+	let houses_basic_wage = 7
+	let houses_neighbours_basic_wage = 3
+	
+	let startup_char_board = reverse (_changeAtBasic (map _processNo  tuple_from_file) (board_size - 1) (_board board_size '0'))
+	let startup_int_board = _placeHousesOnBoard houses_basic_wage (_numberBoard board_size) (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) (board_size - 1) (_board board_size '0'))) 0) 0
+	let startup_int_board2 = _placeHousesOnBoard houses_neighbours_basic_wage (_numberBoard board_size) (_increaseListByFittingCells (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) (board_size - 1) (_board board_size '0'))) 0)) 0
 	let joined_int_boards = _joinLists startup_int_board startup_int_board2
-	let house_index_list = (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) 35 (_board 36 '0'))) 0)
-	--print startup_int_board
-	--print startup_int_board2
-	--print joined_int_boards
+	let house_index_list = _makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) (board_size - 1) (_board board_size '0'))) 0
 	
-	-- STEP0 ereasing rows and columns with 0 number 
-	let rowSTEP0_0 = (_ereaseIf0AtRow 1 (_columnToRow False 0 startup_char_board))
-	let rowSTEP0_1 = (_ereaseIf0AtRow 0 (_columnToRow False 1 startup_char_board))
-	let rowSTEP0_2 = (_ereaseIf0AtRow 2 (_columnToRow False 2 startup_char_board))
-	let rowSTEP0_3 = (_ereaseIf0AtRow 1 (_columnToRow False 3 startup_char_board))
-	let rowSTEP0_4 = (_ereaseIf0AtRow 2 (_columnToRow False 4 startup_char_board))
-	let rowSTEP0_5 = (_ereaseIf0AtRow 1 (_columnToRow False 5 startup_char_board))
-	let concatRowsSTEP0 = rowSTEP0_0 ++ rowSTEP0_1 ++ rowSTEP0_2 ++ rowSTEP0_3 ++ rowSTEP0_4 ++ rowSTEP0_5
 	
-	let colSTEP0_0 = (_ereaseIf0AtRow 1 (_columnToRow True 0 startup_char_board))
-	let colSTEP0_1 = (_ereaseIf0AtRow 1 (_columnToRow True 1 startup_char_board))
-	let colSTEP0_2 = (_ereaseIf0AtRow 2 (_columnToRow True 2 startup_char_board))
-	let colSTEP0_3 = (_ereaseIf0AtRow 1 (_columnToRow True 3 startup_char_board))
-	let colSTEP0_4 = (_ereaseIf0AtRow 1 (_columnToRow True 4 startup_char_board))
-	let colSTEP0_5 = (_ereaseIf0AtRow 1 (_columnToRow True 5 startup_char_board))
-	let concatColsSTEP0 = colSTEP0_0 ++ colSTEP0_1 ++ colSTEP0_2 ++ colSTEP0_3 ++ colSTEP0_4 ++ colSTEP0_5
-	let concatColsProcessedSTEP0 = ((_procColChoice 0 concatColsSTEP0) ++ (_procColChoice 1 concatColsSTEP0) ++ (_procColChoice 2 concatColsSTEP0) ++ (_procColChoice 3 concatColsSTEP0) ++ (_procColChoice 4 concatColsSTEP0) ++ (_procColChoice 5 concatColsSTEP0))
+	{--- STEP0 ereasing rows and columns with 0 number ---}
+	-- let rowSTEP0_0 = _ereaseIf0AtRow 1 (_columnToRow False 0 startup_char_board)
+	let concatRowsSTEP0 = _genericStep0RowsOrCols False left_numbers_from_file rows_list startup_char_board
+	-- let colSTEP0_0 = _ereaseIf0AtRow 1 (_columnToRow True 0 startup_char_board)
+	let concatColsSTEP0 = _genericStep0RowsOrCols True up_numbers_from_file cols_list startup_char_board
+	-- colSTEP0_0 ++ colSTEP0_1 ++ colSTEP0_2 ++ colSTEP0_3 ++ colSTEP0_4 ++ colSTEP0_5
+	let concatColsProcessedSTEP0 = _concatColsProcessed cols_list concatColsSTEP0
+	-- (_procColChoice 0 concatColsSTEP0) ++ (_procColChoice 1 concatColsSTEP0) ++ (_procColChoice 2 concatColsSTEP0) ++ (_procColChoice 3 concatColsSTEP0) ++ (_procColChoice 4 concatColsSTEP0) ++ (_procColChoice 5 concatColsSTEP0)
 	
 	let resultSTEP0 = (_impositionRowsCols concatRowsSTEP0 concatColsProcessedSTEP0)
 	
@@ -308,30 +336,22 @@ main = do
 	print "END OF STEP 0!"
 	print " " -}
 	
-	-- STEP1 ereasing cells which are on the edges for hauses & placing warmers if numbers at row/col beginning are the same
+	
+	{--- STEP1 ereasing cells which are on the edges for hauses & placing warmers if numbers at row/col beginning are the same ---}
 	-- First step of project in rows
-	let rowSTEP1_0 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow False 0 int_board_with_wagesSTEP0) (_columnToRow False 0 resultSTEP0)))
-	let rowSTEP1_1 = (_checkEqualityRow 0 (_ereaseIfNotFitting (_columnToRow False 1 int_board_with_wagesSTEP0) (_columnToRow False 1 resultSTEP0)))
-	let rowSTEP1_2 = (_checkEqualityRow 2 (_ereaseIfNotFitting (_columnToRow False 2 int_board_with_wagesSTEP0) (_columnToRow False 2 resultSTEP0)))
-	let rowSTEP1_3 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow False 3 int_board_with_wagesSTEP0) (_columnToRow False 3 resultSTEP0)))
-	let rowSTEP1_4 = (_checkEqualityRow 2 (_ereaseIfNotFitting (_columnToRow False 4 int_board_with_wagesSTEP0) (_columnToRow False 4 resultSTEP0)))
-	let rowSTEP1_5 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow False 5 int_board_with_wagesSTEP0) (_columnToRow False 5 resultSTEP0)))
-	let concatRowsSTEP1 = rowSTEP1_0 ++ rowSTEP1_1 ++ rowSTEP1_2 ++ rowSTEP1_3 ++ rowSTEP1_4 ++ rowSTEP1_5
-	
+	let concatRowsSTEP1 = _genericEreasingHousesAndPlacingWarmers False left_numbers_from_file rows_list int_board_with_wagesSTEP0 resultSTEP0
+	--let rowSTEP1_0 = _checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow False 0 int_board_with_wagesSTEP0) (_columnToRow False 0 resultSTEP0))
+	--let concatRowsSTEP1 = rowSTEP1_0 ++ rowSTEP1_1 ++ rowSTEP1_2 ++ rowSTEP1_3 ++ rowSTEP1_4 ++ rowSTEP1_5
 	-- First step of project in columns
-	let colSTEP1_0 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow True 0 int_board_with_wagesSTEP0) (_columnToRow True 0 resultSTEP0)))
-	let colSTEP1_1 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow True 1 int_board_with_wagesSTEP0) (_columnToRow True 1 resultSTEP0)))
-	let colSTEP1_2 = (_checkEqualityRow 2 (_ereaseIfNotFitting (_columnToRow True 2 int_board_with_wagesSTEP0) (_columnToRow True 2 resultSTEP0)))
-	let colSTEP1_3 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow True 3 int_board_with_wagesSTEP0) (_columnToRow True 3 resultSTEP0)))
-	let colSTEP1_4 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow True 4 int_board_with_wagesSTEP0) (_columnToRow True 4 resultSTEP0)))
-	let colSTEP1_5 = (_checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow True 5 int_board_with_wagesSTEP0) (_columnToRow True 5 resultSTEP0)))
-	let concatColsSTEP1 = colSTEP1_0 ++ colSTEP1_1 ++ colSTEP1_2 ++ colSTEP1_3 ++ colSTEP1_4 ++ colSTEP1_5
-	let concatColsProcessedSTEP1 = ((_procColChoice 0 concatColsSTEP1) ++ (_procColChoice 1 concatColsSTEP1) ++ (_procColChoice 2 concatColsSTEP1) ++ (_procColChoice 3 concatColsSTEP1) ++ (_procColChoice 4 concatColsSTEP1) ++ (_procColChoice 5 concatColsSTEP1))
+	let concatColsSTEP1 = _genericEreasingHousesAndPlacingWarmers True up_numbers_from_file cols_list int_board_with_wagesSTEP0 resultSTEP0
+	--let colSTEP1_0 = _checkEqualityRow 1 (_ereaseIfNotFitting (_columnToRow True 0 int_board_with_wagesSTEP0) (_columnToRow True 0 resultSTEP0))
+	--let concatColsSTEP1 = colSTEP1_0 ++ colSTEP1_1 ++ colSTEP1_2 ++ colSTEP1_3 ++ colSTEP1_4 ++ colSTEP1_5
+	let concatColsProcessedSTEP1 = _concatColsProcessed cols_list concatColsSTEP1
 	
-	let resultSTEP1 = (_impositionRowsCols concatRowsSTEP1 concatColsProcessedSTEP1)
+	let resultSTEP1 = _impositionRowsCols concatRowsSTEP1 concatColsProcessedSTEP1
 	
 	-- wages calculation
-	let calculate_wages_housesSTEP1 = (_updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP1)
+	let calculate_wages_housesSTEP1 = _updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP1
 	let int_board_with_wagesSTEP1 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions house_index_list calculate_wages_housesSTEP1 joined_int_boards) resultSTEP1
 	
 	{-print concatRowsSTEP1
@@ -343,29 +363,17 @@ main = do
 	print "END OF STEP 1!"
 	print " " -}
 	
-	-- STEP2 (we' ve got to find out if count of settled warmers is equal to number at the beginning - if yes, other '0' fields will be 'X'): 
-	let rowSTEP2_0 = (_checkIfAllWarmersInRow 1 (_columnToRow False 0 resultSTEP1))
-	let rowSTEP2_1 = (_checkIfAllWarmersInRow 0 (_columnToRow False 1 resultSTEP1))
-	let rowSTEP2_2 = (_checkIfAllWarmersInRow 2 (_columnToRow False 2 resultSTEP1))
-	let rowSTEP2_3 = (_checkIfAllWarmersInRow 1 (_columnToRow False 3 resultSTEP1))
-	let rowSTEP2_4 = (_checkIfAllWarmersInRow 2 (_columnToRow False 4 resultSTEP1))
-	let rowSTEP2_5 = (_checkIfAllWarmersInRow 1 (_columnToRow False 5 resultSTEP1))
-	let concatRowsSTEP2 = rowSTEP2_0 ++ rowSTEP2_1 ++ rowSTEP2_2 ++ rowSTEP2_3 ++ rowSTEP2_4 ++ rowSTEP2_5
 	
-	let colSTEP2_0 = (_checkIfAllWarmersInRow 1 (_columnToRow True 0 resultSTEP1))
-	let colSTEP2_1 = (_checkIfAllWarmersInRow 1 (_columnToRow True 1 resultSTEP1))
-	let colSTEP2_2 = (_checkIfAllWarmersInRow 2 (_columnToRow True 2 resultSTEP1))
-	let colSTEP2_3 = (_checkIfAllWarmersInRow 1 (_columnToRow True 3 resultSTEP1))
-	let colSTEP2_4 = (_checkIfAllWarmersInRow 1 (_columnToRow True 4 resultSTEP1))
-	let colSTEP2_5 = (_checkIfAllWarmersInRow 1 (_columnToRow True 5 resultSTEP1))
-	let concatColsSTEP2 = colSTEP2_0 ++ colSTEP2_1 ++ colSTEP2_2 ++ colSTEP2_3 ++ colSTEP2_4 ++ colSTEP2_5
-	let concatColsProcessedSTEP2 = ((_procColChoice 0 concatColsSTEP2) ++ (_procColChoice 1 concatColsSTEP2) ++ (_procColChoice 2 concatColsSTEP2) ++ (_procColChoice 3 concatColsSTEP2) ++ (_procColChoice 4 concatColsSTEP2) ++ (_procColChoice 5 concatColsSTEP2))
+	{--- STEP2 (we' ve got to find out if count of settled warmers is equal to number at the beginning - if yes, other '0' fields will be 'X'): ---}
+	let concatRowsSTEP2 = _genericCheckIfAllWarmers False left_numbers_from_file rows_list resultSTEP1
+	let concatColsSTEP2 = _genericCheckIfAllWarmers True up_numbers_from_file cols_list resultSTEP1
+	let concatColsProcessedSTEP2 = _concatColsProcessed cols_list concatColsSTEP2
 	
-	let resultSTEP2 = (_impositionRowsCols concatRowsSTEP2 concatColsProcessedSTEP2)
+	let resultSTEP2 = _impositionRowsCols concatRowsSTEP2 concatColsProcessedSTEP2
 	
 	-- wages calculation
-	let calculate_wages_housesSTEP2 = (_updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP2)
-	let int_board_with_wagesSTEP2 = (_updateWageBoardByOptions house_index_list calculate_wages_housesSTEP2 joined_int_boards)
+	let calculate_wages_housesSTEP2 = _updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP2
+	let int_board_with_wagesSTEP2 = _updateWageBoardByOptions house_index_list calculate_wages_housesSTEP2 joined_int_boards
 	
 	{-print concatRowsSTEP2
 	print concatColsProcessedSTEP2 
@@ -376,11 +384,12 @@ main = do
 	print "END OF STEP 2!"
 	print " " -}
 	
-	-- STEP3 erease cells at the edges of warmers
-	let resultSTEP3 = _ereaseByWarmers 0 (_ereaseByWarmersList 6 (_makeWarmersIndexList 0 resultSTEP2)) resultSTEP2	
+	
+	{--- STEP3 erease cells at the edges of warmers ---}
+	let resultSTEP3 = _ereaseByWarmers 0 (_ereaseByWarmersList board_dim_1 (_makeWarmersIndexList 0 resultSTEP2)) resultSTEP2	
 	
 	-- wages calculation
-	let calculate_wages_housesSTEP3 = (_updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP3)
+	let calculate_wages_housesSTEP3 = _updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP3
 	let int_board_with_wagesSTEP3 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions house_index_list calculate_wages_housesSTEP3 joined_int_boards) resultSTEP3
 	
 	{-print "warmerList:"
@@ -391,30 +400,18 @@ main = do
 	print "END OF STEP 3!"
 	print " " -}
 	
-	-- STEP4 once again STEP1
-	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
-	let rowSTEP4_0 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow False 0 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow False 0 joined_int_boards) (_columnToRow False 0 resultSTEP3)))
-	let rowSTEP4_1 = (_checkEqualityRow (0 - _countWarmersInRow (_columnToRow False 1 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow False 1 joined_int_boards) (_columnToRow False 1 resultSTEP3)))
-	let rowSTEP4_2 = (_checkEqualityRow (2 - _countWarmersInRow (_columnToRow False 2 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow False 2 joined_int_boards) (_columnToRow False 2 resultSTEP3)))
-	let rowSTEP4_3 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow False 3 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow False 3 joined_int_boards) (_columnToRow False 3 resultSTEP3)))
-	let rowSTEP4_4 = (_checkEqualityRow (2 - _countWarmersInRow (_columnToRow False 4 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow False 4 joined_int_boards) (_columnToRow False 4 resultSTEP3)))
-	let rowSTEP4_5 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow False 5 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow False 5 joined_int_boards) (_columnToRow False 5 resultSTEP3)))
-	let concatRowsSTEP4 = rowSTEP4_0 ++ rowSTEP4_1 ++ rowSTEP4_2 ++ rowSTEP4_3 ++ rowSTEP4_4 ++ rowSTEP4_5
 	
+	{--- STEP4 once again STEP1 ---}
 	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
-	let colSTEP4_0 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow True 0 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow True 0 joined_int_boards) (_columnToRow True 0 resultSTEP3)))
-	let colSTEP4_1 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow True 1 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow True 1 joined_int_boards) (_columnToRow True 1 resultSTEP3)))
-	let colSTEP4_2 = (_checkEqualityRow (2 - _countWarmersInRow (_columnToRow True 2 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow True 2 joined_int_boards) (_columnToRow True 2 resultSTEP3)))
-	let colSTEP4_3 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow True 3 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow True 3 joined_int_boards) (_columnToRow True 3 resultSTEP3)))
-	let colSTEP4_4 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow True 4 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow True 4 joined_int_boards) (_columnToRow True 4 resultSTEP3)))
-	let colSTEP4_5 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow True 5 resultSTEP3)) (_ereaseIfNotFitting (_columnToRow True 5 joined_int_boards) (_columnToRow True 5 resultSTEP3)))
-	let concatColsSTEP4 = colSTEP4_0 ++ colSTEP4_1 ++ colSTEP4_2 ++ colSTEP4_3 ++ colSTEP4_4 ++ colSTEP4_5
-	let concatColsProcessedSTEP4 = ((_procColChoice 0 concatColsSTEP4) ++ (_procColChoice 1 concatColsSTEP4) ++ (_procColChoice 2 concatColsSTEP4) ++ (_procColChoice 3 concatColsSTEP4) ++ (_procColChoice 4 concatColsSTEP4) ++ (_procColChoice 5 concatColsSTEP4))
+	let concatRowsSTEP4 = _genericEreasingHouAndWarmAdditional False left_numbers_from_file rows_list joined_int_boards resultSTEP3
+	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
+	let concatColsSTEP4 = _genericEreasingHouAndWarmAdditional True up_numbers_from_file cols_list joined_int_boards resultSTEP3
+	let concatColsProcessedSTEP4 = _concatColsProcessed cols_list concatColsSTEP4
 	
 	let resultSTEP4 = _impositionRowsCols concatRowsSTEP4 concatColsProcessedSTEP4
 	
 	-- wages calculation
-	let calculate_wages_housesSTEP4 = (_updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP4)
+	let calculate_wages_housesSTEP4 = _updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP4
 	let int_board_with_wagesSTEP4 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions house_index_list calculate_wages_housesSTEP4 joined_int_boards) resultSTEP4
 	
 	{-print concatRowsSTEP4
@@ -426,69 +423,46 @@ main = do
 	print "END OF STEP 4!"
 	print " " -}
 	
-	-- STEP5 checking if we can find over int board 4 value - if so, we can surely place there warmer, because it's the only place where house could have warmer!
+	
+	{--- STEP5 checking if we can find over int board 4 value - if so, we can surely place there warmer, because it's the only place where house could have warmer! ---}
 	let resultSTEP5 = _placeIfCellEquals4 int_board_with_wagesSTEP4 resultSTEP4
 	
 	-- wages calculation
-	let calculate_wages_housesSTEP5 = (_updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP5)
+	let calculate_wages_housesSTEP5 = _updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP5
 	let int_board_with_wagesSTEP5 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions house_index_list calculate_wages_housesSTEP5 joined_int_boards) resultSTEP5
 	
 	{-print " "
 	print "END OF STEP 5!"
 	print " " 	-}
 	
-	-- STEP6 once again STEP2 
-	let rowSTEP6_0 = (_checkIfAllWarmersInRow 1 (_columnToRow False 0 resultSTEP5))
-	let rowSTEP6_1 = (_checkIfAllWarmersInRow 0 (_columnToRow False 1 resultSTEP5))
-	let rowSTEP6_2 = (_checkIfAllWarmersInRow 2 (_columnToRow False 2 resultSTEP5))
-	let rowSTEP6_3 = (_checkIfAllWarmersInRow 1 (_columnToRow False 3 resultSTEP5))
-	let rowSTEP6_4 = (_checkIfAllWarmersInRow 2 (_columnToRow False 4 resultSTEP5))
-	let rowSTEP6_5 = (_checkIfAllWarmersInRow 1 (_columnToRow False 5 resultSTEP5))
-	let concatRowsSTEP6 = rowSTEP6_0 ++ rowSTEP6_1 ++ rowSTEP6_2 ++ rowSTEP6_3 ++ rowSTEP6_4 ++ rowSTEP6_5
 	
-	let colSTEP6_0 = (_checkIfAllWarmersInRow 1 (_columnToRow True 0 resultSTEP5))
-	let colSTEP6_1 = (_checkIfAllWarmersInRow 1 (_columnToRow True 1 resultSTEP5))
-	let colSTEP6_2 = (_checkIfAllWarmersInRow 2 (_columnToRow True 2 resultSTEP5))
-	let colSTEP6_3 = (_checkIfAllWarmersInRow 1 (_columnToRow True 3 resultSTEP5))
-	let colSTEP6_4 = (_checkIfAllWarmersInRow 1 (_columnToRow True 4 resultSTEP5))
-	let colSTEP6_5 = (_checkIfAllWarmersInRow 1 (_columnToRow True 5 resultSTEP5))
-	let concatColsSTEP6 = colSTEP6_0 ++ colSTEP6_1 ++ colSTEP6_2 ++ colSTEP6_3 ++ colSTEP6_4 ++ colSTEP6_5
-	let concatColsProcessedSTEP6 = ((_procColChoice 0 concatColsSTEP6) ++ (_procColChoice 1 concatColsSTEP6) ++ (_procColChoice 2 concatColsSTEP6) ++ (_procColChoice 3 concatColsSTEP6) ++ (_procColChoice 4 concatColsSTEP6) ++ (_procColChoice 5 concatColsSTEP6))
+	{--- STEP6 once again STEP2 ---}
+	let concatRowsSTEP6 = _genericCheckIfAllWarmers False left_numbers_from_file rows_list resultSTEP5
+	let concatColsSTEP6 = _genericCheckIfAllWarmers True up_numbers_from_file cols_list resultSTEP5
+	let concatColsProcessedSTEP6 = _concatColsProcessed cols_list concatColsSTEP6
 	
-	let resultSTEP6 = (_impositionRowsCols concatRowsSTEP6 concatColsProcessedSTEP6)
+	let resultSTEP6 = _impositionRowsCols concatRowsSTEP6 concatColsProcessedSTEP6
 	
 	-- wages calculation
-	let calculate_wages_housesSTEP6 = (_updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP6)
+	let calculate_wages_housesSTEP6 = _updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP6
 	let int_board_with_wagesSTEP6 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions house_index_list calculate_wages_housesSTEP6 joined_int_boards) resultSTEP6
 	
 	{-print " "
 	print "END OF STEP 6!"
 	print " " -}
 	
-	-- STEP7 once again STEP1
-	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
-	let rowSTEP7_0 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow False 0 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow False 0 joined_int_boards) (_columnToRow False 0 resultSTEP6)))
-	let rowSTEP7_1 = (_checkEqualityRow (0 - _countWarmersInRow (_columnToRow False 1 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow False 1 joined_int_boards) (_columnToRow False 1 resultSTEP6)))
-	let rowSTEP7_2 = (_checkEqualityRow (2 - _countWarmersInRow (_columnToRow False 2 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow False 2 joined_int_boards) (_columnToRow False 2 resultSTEP6)))
-	let rowSTEP7_3 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow False 3 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow False 3 joined_int_boards) (_columnToRow False 3 resultSTEP6)))
-	let rowSTEP7_4 = (_checkEqualityRow (2 - _countWarmersInRow (_columnToRow False 4 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow False 4 joined_int_boards) (_columnToRow False 4 resultSTEP6)))
-	let rowSTEP7_5 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow False 5 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow False 5 joined_int_boards) (_columnToRow False 5 resultSTEP6)))
-	let concatRowsSTEP7 = rowSTEP7_0 ++ rowSTEP7_1 ++ rowSTEP7_2 ++ rowSTEP7_3 ++ rowSTEP7_4 ++ rowSTEP7_5
 	
+	{--- STEP7 once again STEP1 ---}
 	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
-	let colSTEP7_0 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow True 0 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow True 0 joined_int_boards) (_columnToRow True 0 resultSTEP6)))
-	let colSTEP7_1 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow True 1 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow True 1 joined_int_boards) (_columnToRow True 1 resultSTEP6)))
-	let colSTEP7_2 = (_checkEqualityRow (2 - _countWarmersInRow (_columnToRow True 2 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow True 2 joined_int_boards) (_columnToRow True 2 resultSTEP6)))
-	let colSTEP7_3 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow True 3 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow True 3 joined_int_boards) (_columnToRow True 3 resultSTEP6)))
-	let colSTEP7_4 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow True 4 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow True 4 joined_int_boards) (_columnToRow True 4 resultSTEP6)))
-	let colSTEP7_5 = (_checkEqualityRow (1 - _countWarmersInRow (_columnToRow True 5 resultSTEP6)) (_ereaseIfNotFitting (_columnToRow True 5 joined_int_boards) (_columnToRow True 5 resultSTEP6)))
-	let concatColsSTEP7 = colSTEP7_0 ++ colSTEP7_1 ++ colSTEP7_2 ++ colSTEP7_3 ++ colSTEP7_4 ++ colSTEP7_5
-	let concatColsProcessedSTEP7 = ((_procColChoice 0 concatColsSTEP7) ++ (_procColChoice 1 concatColsSTEP7) ++ (_procColChoice 2 concatColsSTEP7) ++ (_procColChoice 3 concatColsSTEP7) ++ (_procColChoice 4 concatColsSTEP7) ++ (_procColChoice 5 concatColsSTEP7))
+	let concatRowsSTEP7 = _genericEreasingHouAndWarmAdditional False left_numbers_from_file rows_list joined_int_boards resultSTEP6
+	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
+	let concatColsSTEP7 = _genericEreasingHouAndWarmAdditional True up_numbers_from_file cols_list joined_int_boards resultSTEP6
+	let concatColsProcessedSTEP7 = _concatColsProcessed cols_list concatColsSTEP7
 	
 	let resultSTEP7 = _impositionRowsCols concatRowsSTEP7 concatColsProcessedSTEP7
 	
 	-- wages calculation
-	let calculate_wages_housesSTEP7 = (_updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP7)
+	let calculate_wages_housesSTEP7 = _updateAllIntBoardByCheckOptions 0 house_index_list resultSTEP7
 	let int_board_with_wagesSTEP7 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions house_index_list calculate_wages_housesSTEP7 joined_int_boards) resultSTEP7
 	
 	-- print int_board_with_wagesSTEP7
@@ -501,7 +475,7 @@ main = do
 	putStrLn (_columnToRow False 5 resultSTEP7)
 	
 	{-print " "
-	print "END OF STEP 6!"
+	print "END OF STEP 7!"
 	print " " 
 	-}
 	

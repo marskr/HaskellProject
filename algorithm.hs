@@ -20,8 +20,8 @@ byTwos xs = zip firsts seconds
 _checkIfExist :: [Int] -> Int -> Bool
 _checkIfExist [] _ = False
 _checkIfExist (x:xs) n 
-                       | x == n = True
-					   | otherwise = _checkIfExist xs n
+						| x == n = True
+						| otherwise = _checkIfExist xs n
 
 	-- [Lista miejsc do zmiany] -> maksymalny elem na liscie ->
 	-- [Lista charów zmienianych] -> wynik (board) 
@@ -29,12 +29,11 @@ _checkIfExist (x:xs) n
 _changeAtBasic :: [Int] -> Int -> [Char] -> [Char]
 _changeAtBasic _ _ [] = [] 
 _changeAtBasic xs n (y:ys)
-				  | _checkIfExist xs n == True = 'H' : _changeAtBasic xs (n-1) ys
-				  | otherwise = y : _changeAtBasic xs (n-1) ys
+						| _checkIfExist xs n == True = 'H' : _changeAtBasic xs (n-1) ys
+						| otherwise = y : _changeAtBasic xs (n-1) ys
 
--- processing provided tuple into an index of table number
-_processNo :: (Int,Int) -> Int
-_processNo (n,t) = 6 * n + t															-- ONE MORE TO CONVERT TO GENERIC!!!
+_processNo :: Int -> (Int, Int) -> Int
+_processNo dim (n,t) = dim * n + t
 
 -- board creation 
 _board :: Int -> Char -> [Char]
@@ -45,8 +44,8 @@ _board n x = x : _board (n-1) x
 _ereaseIf0AtRow :: Int -> [Char] -> [Char]
 _ereaseIf0AtRow _ [] = []
 _ereaseIf0AtRow n (x:xs) 
-				  | n == 0 = 'X' : _ereaseIf0AtRow n xs
-				  | otherwise = x : _ereaseIf0AtRow n xs
+						| n == 0 && x == '0' = 'X' : _ereaseIf0AtRow n xs
+						| otherwise = x : _ereaseIf0AtRow n xs
 				  
 -- creation of number board 				
 _numberBoard :: Int -> [Int]
@@ -292,9 +291,17 @@ main = do
 		
         hClose handle 
 	
-	let tuple_from_file = [(0,1), (3,2), (3,4), (4,0), (4,4), (5,2), (5,5)]
-	let left_numbers_from_file = [1, 0, 2, 1, 2, 1]
-	let up_numbers_from_file = [1, 1, 2, 1, 1, 1] 
+	--let tuple_from_file = [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]
+	--let left_numbers_from_file = [1,0,2,1,2,1]
+	--let up_numbers_from_file = [1,1,2,1,1,1] 
+	
+	let tuple_from_file = [(0,4),(1,1),(1,3),(1,5),(2,2),(3,0),(4,2),(5,5)]
+	let left_numbers_from_file = [2,0,3,0,2,1]
+	let up_numbers_from_file = [1,1,1,2,0,3] 
+	
+	--let tuple_from_file = [(0,6),(1,4),(4,2),(5,0)]
+	--let left_numbers_from_file = [1,1,0,1,0,1,0]
+	--let up_numbers_from_file = [0,1,1,0,1,0,1] 
 	
 	let board_dim_1 = length left_numbers_from_file
 	let board_dim_2 = length up_numbers_from_file
@@ -305,11 +312,11 @@ main = do
 	let houses_basic_wage = 7
 	let houses_neighbours_basic_wage = 3
 	
-	let startup_char_board = reverse (_changeAtBasic (map _processNo  tuple_from_file) (board_size - 1) (_board board_size '0'))
-	let startup_int_board = _placeHousesOnBoard houses_basic_wage (_numberBoard board_size) (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) (board_size - 1) (_board board_size '0'))) 0) 0
-	let startup_int_board2 = _placeHousesOnBoard houses_neighbours_basic_wage (_numberBoard board_size) (_increaseListByFittingCells board_dim_1 (_makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) (board_size - 1) (_board board_size '0'))) 0)) 0
+	let startup_char_board = reverse (_changeAtBasic (map (_processNo board_dim_1) tuple_from_file) (board_size - 1) (_board board_size '0'))
+	let startup_int_board = _placeHousesOnBoard houses_basic_wage (_numberBoard board_size) (_makeHousesIndexList (reverse (_changeAtBasic (map (_processNo board_dim_1) tuple_from_file) (board_size - 1) (_board board_size '0'))) 0) 0
+	let startup_int_board2 = _placeHousesOnBoard houses_neighbours_basic_wage (_numberBoard board_size) (_increaseListByFittingCells board_dim_1 (_makeHousesIndexList (reverse (_changeAtBasic (map (_processNo board_dim_1) tuple_from_file) (board_size - 1) (_board board_size '0'))) 0)) 0
 	let joined_int_boards = _joinLists startup_int_board startup_int_board2
-	let house_index_list = _makeHousesIndexList (reverse (_changeAtBasic (map _processNo tuple_from_file) (board_size - 1) (_board board_size '0'))) 0
+	let house_index_list = _makeHousesIndexList (reverse (_changeAtBasic (map (_processNo board_dim_1) tuple_from_file) (board_size - 1) (_board board_size '0'))) 0
 	
 	
 	{--- STEP0 ereasing rows and columns with 0 number ---}
@@ -446,13 +453,5 @@ main = do
 	{-print " "
 	print "END OF STEP 7!"
 	print " " -}
-	
-
-
-	
-	
-	
-	
-	
 	
 	

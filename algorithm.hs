@@ -15,13 +15,13 @@ byTwos xs = zip firsts seconds
           firsts     = [fst x | x <- enumerated, odd $ snd x]
           seconds    = [fst x | x <- enumerated, even $ snd x]
 -- end of data extraction from file
-		  
+	  
 -- check if in table exist provided item
 _checkIfExist :: [Int] -> Int -> Bool
 _checkIfExist [] _ = False
 _checkIfExist (x:xs) n 
-								| x == n = True
-								| otherwise = _checkIfExist xs n
+						| x == n = True
+						| otherwise = _checkIfExist xs n
 
 	-- [Lista miejsc do zmiany] -> maksymalny elem na liscie ->
 	-- [Lista charów zmienianych] -> wynik (board) 
@@ -29,8 +29,8 @@ _checkIfExist (x:xs) n
 _changeAtBasic :: [Int] -> Int -> [Char] -> [Char]
 _changeAtBasic _ _ [] = [] 
 _changeAtBasic xs n (y:ys)
-								| _checkIfExist xs n == True = 'H' : _changeAtBasic xs (n-1) ys
-								| otherwise = y : _changeAtBasic xs (n-1) ys
+						| _checkIfExist xs n == True = 'H' : _changeAtBasic xs (n-1) ys
+						| otherwise = y : _changeAtBasic xs (n-1) ys
 
 _processNo :: Int -> (Int, Int) -> Int
 _processNo dim (n,t) = dim * n + t
@@ -44,21 +44,21 @@ _board n x = x : _board (n-1) x
 _ereaseIf0AtRow :: Int -> [Char] -> [Char]
 _ereaseIf0AtRow _ [] = []
 _ereaseIf0AtRow n (x:xs) 
-								| n == 0 && x == '0' = 'X' : _ereaseIf0AtRow n xs
-								| otherwise = x : _ereaseIf0AtRow n xs
+						| n == 0 && x == '0' = 'X' : _ereaseIf0AtRow n xs
+						| otherwise = x : _ereaseIf0AtRow n xs
 				  
 -- creation of number board 				
 _numberBoard :: Int -> [Int]
 _numberBoard n =  sub 0
-					where sub i | i >= n =  []
-								| otherwise = 0 : sub (i + 1)
+			where sub i | i >= n =  []
+						| otherwise = 0 : sub (i + 1)
 						
 						-- list numberBoard | list of house indexes
 _placeHousesOnBoard :: Int -> [Int] -> [Int] -> Int -> [Int]
 _placeHousesOnBoard _ [] _ _ = []
 _placeHousesOnBoard wage (x:xs) ys index	
-								| (_checkIfExist ys index) = (x + wage) : _placeHousesOnBoard wage xs ys (index + 1)
-								| otherwise = x : _placeHousesOnBoard wage xs ys (index + 1)
+						| (_checkIfExist ys index) = (x + wage) : _placeHousesOnBoard wage xs ys (index + 1)
+						| otherwise = x : _placeHousesOnBoard wage xs ys (index + 1)
 
 _makeHousesIndexList :: [Char] -> Int -> [Int]
 _makeHousesIndexList [] _ = []
@@ -271,7 +271,6 @@ _genericEreasingHouAndWarmAdditional dim choice (x:xs) (y:ys) zs ts = (_checkEqu
 
 {--- Additional ---}
 -- putStrLn (_columnToRow False 0 resultSTEP7)
-		
 			
 main = do
 	--putStrLn "- 1 - 1 - 2 - 1 - 1 - 1"
@@ -280,20 +279,14 @@ main = do
 	handle <- openFile "input_file.txt" ReadMode
         contents <- hGetContents handle
         let singlewords = lines contents
-            --numberedParams = zipWith (\n line -> line) [0..] singlewords
-        let list = f (words (singlewords!!0))
-        let listb = f (words (singlewords!!1))
-        let tuple_from_file2 = byTwos ( f (words (singlewords!!2)))
-		
-        --print tuple_from_file2
-        --print listb
-        --print tuple_from_file
-		
-        hClose handle 
+        let first_line = f (words (singlewords!!0))
+        let second_line = f (words (singlewords!!1))
+        let tuple_from_file2 = byTwos ( f (words (singlewords!!2)))		
+       
 	
-	let tuple_from_file = [(0,1),(3,2),(3,4),(4,0),(4,4),(5,2),(5,5)]
-	let left_numbers_from_file = [1,0,2,1,2,1]
-	let up_numbers_from_file = [1,1,2,1,1,1] 
+	let tuple_from_file = tuple_from_file2
+	let left_numbers_from_file = first_line
+	let up_numbers_from_file = second_line 
 	
 	--let tuple_from_file = [(0,4),(1,1),(1,3),(1,5),(2,2),(3,0),(4,2),(5,5)]
 	--let left_numbers_from_file = [2,0,3,0,2,1]
@@ -442,17 +435,38 @@ main = do
 	let int_board_with_wagesSTEP7 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP7 joined_int_boards) resultSTEP7
 	
 	-- print int_board_with_wagesSTEP7
-	
+	    
+
+    -- putStrLn "Done"   
+	putStrLn "Here is the solution:"
+	putStrLn "---------------------"
+	putStrLn ""
 	putStrLn (_columnToRow board_dim_1 False 0 resultSTEP7)
 	putStrLn (_columnToRow board_dim_1 False 1 resultSTEP7)
 	putStrLn (_columnToRow board_dim_1 False 2 resultSTEP7)
 	putStrLn (_columnToRow board_dim_1 False 3 resultSTEP7)
 	putStrLn (_columnToRow board_dim_1 False 4 resultSTEP7)
 	putStrLn (_columnToRow board_dim_1 False 5 resultSTEP7)
-	--putStrLn (_columnToRow board_dim_1 False 6 resultSTEP7)
+	putStrLn (_columnToRow board_dim_1 False 6 resultSTEP7)
+	putStrLn "---------------------"
 	
+	
+	-- providing solution to file
+	putStrLn "Enter name of file for solution:"
+	name <- getLine
+	let fileName = name
+    
+	fileExist <- doesFileExist fileName
+    
+	if not fileExist then writeFile fileName name else return ()
+	
+	writeFile fileName ("Here is the solution:\n"++(_columnToRow board_dim_1 False 0 resultSTEP7)++"\n"++(_columnToRow board_dim_1 False 1 resultSTEP7)++"\n"++(_columnToRow board_dim_1 False 2 resultSTEP7)++ "\n"++(_columnToRow board_dim_1 False 3 resultSTEP7)++ "\n"++(_columnToRow board_dim_1 False 4 resultSTEP7)++"\n"++(_columnToRow board_dim_1 False 5 resultSTEP7)++"\n"++(_columnToRow board_dim_1 False 6 resultSTEP7))
+ 
+	--writeFile fileName (_columnToRow board_dim_1 False 5 resultSTEP7)
+	--putStrLn (_columnToRow board_dim_1 False 6 resultSTEP7)
+	putStrLn "Solution saved to file"
+	
+	hClose handle 
 	{-print " "
 	print "END OF STEP 7!"
 	print " " -}
-	
-	

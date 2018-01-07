@@ -240,6 +240,20 @@ _placeIfCellEquals4 (x:xs) (y:ys)
 								| x == 4 && y == '0' = 'W' : _placeIfCellEquals4 xs ys
 								| otherwise = y : _placeIfCellEquals4 xs ys 
 
+-- checking in column and row number of warmers and comparing to the beginning number		
+-- 						first list of numbers, second no of wamers in row						
+_compareWarmersThroughRows :: [Int] -> [Int] -> [Bool]
+_compareWarmersThroughRows [] [] = []
+_compareWarmersThroughRows (x:xs) (y:ys) 
+								| x == y = True : _compareWarmersThroughRows xs ys
+								| otherwise = False : _compareWarmersThroughRows xs ys
+								
+_checkIf0Exist :: [Char] -> Bool
+_checkIf0Exist [] = False
+_checkIf0Exist (x:xs) 
+								| x == '0' = True
+								| otherwise = False
+						
 {--- here will be placed generic transformation part - naive version will be changed into generic one ---}
 {--- STEP0 ---}
 _genericStep0RowsOrCols :: Int -> Bool -> [Int] -> [Int] -> [Char] -> [Char]	
@@ -269,13 +283,153 @@ _genericEreasingHouAndWarmAdditional :: Int -> Bool -> [Int] -> [Int] -> [Int] -
 _genericEreasingHouAndWarmAdditional _ _ [] [] _ _ = [] 
 _genericEreasingHouAndWarmAdditional dim choice (x:xs) (y:ys) zs ts = (_checkEqualityRow (x - _countWarmersInRow (_columnToRow dim choice y ts)) (_ereaseIfNotFitting (_columnToRow dim choice y zs) (_columnToRow dim choice y ts))) ++ (_genericEreasingHouAndWarmAdditional dim choice xs ys zs ts)
 
-{--- Additional ---}
--- putStrLn (_columnToRow False 0 resultSTEP7)
-			
-main = do
-	--putStrLn "- 1 - 1 - 2 - 1 - 1 - 1"
-	--putStrLn ( unlines ["1","0","2","1","2","1"])
+
+_genSTEP0 :: Int -> [Int] -> [Int] -> [Int] -> [Int] -> [Char] -> [Char]
+_genSTEP0 _ _ _ _ _ [] = []
+_genSTEP0 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list startup_char_board = _impositionRowsCols (_genericStep0RowsOrCols board_dim_1 False left_numbers_from_file rows_list startup_char_board) (_concatColsProcessed board_dim_1 cols_list (_genericStep0RowsOrCols board_dim_1 True up_numbers_from_file cols_list startup_char_board))
+{-let concatRowsSTEP0 = _genericStep0RowsOrCols board_dim_1 False left_numbers_from_file rows_list startup_char_board
+let concatColsSTEP0 = _genericStep0RowsOrCols board_dim_1 True up_numbers_from_file cols_list startup_char_board
+let concatColsProcessedSTEP0 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP0
 	
+let resultSTEP0 = (_impositionRowsCols concatRowsSTEP0 concatColsProcessedSTEP0)-}
+
+_genSTEP1 :: Int -> [Int] -> [Int] -> [Int] -> [Int] -> [Int] -> [Char] -> [Char]
+_genSTEP1 _ _ _ _ _ _ [] = []
+_genSTEP1 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list int_board_with_wagesSTEP resultSTEP = _impositionRowsCols (_genericEreasingHousesAndPlacingWarmers board_dim_1 False left_numbers_from_file rows_list int_board_with_wagesSTEP resultSTEP) (_concatColsProcessed board_dim_1 cols_list (_genericEreasingHousesAndPlacingWarmers board_dim_1 True up_numbers_from_file cols_list int_board_with_wagesSTEP resultSTEP))
+{-let concatRowsSTEP1 = _genericEreasingHousesAndPlacingWarmers board_dim_1 False left_numbers_from_file rows_list int_board_with_wagesSTEP0 resultSTEP0
+let concatColsSTEP1 = _genericEreasingHousesAndPlacingWarmers board_dim_1 True up_numbers_from_file cols_list int_board_with_wagesSTEP0 resultSTEP0
+let concatColsProcessedSTEP1 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP1
+let resultSTEP1 = _impositionRowsCols concatRowsSTEP1 concatColsProcessedSTEP1-}
+
+_genSTEP2 :: Int -> [Int] -> [Int] -> [Int] -> [Int] -> [Char] -> [Char]
+_genSTEP2 _ _ _ _ _ [] = []
+_genSTEP2 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list resultSTEP = _impositionRowsCols (_genericCheckIfAllWarmers board_dim_1 False left_numbers_from_file rows_list resultSTEP) (_concatColsProcessed board_dim_1 cols_list (_genericCheckIfAllWarmers board_dim_1 True up_numbers_from_file cols_list resultSTEP))
+{-let concatRowsSTEP2 = _genericCheckIfAllWarmers board_dim_1 False left_numbers_from_file rows_list resultSTEP1
+let concatColsSTEP2 = _genericCheckIfAllWarmers board_dim_1 True up_numbers_from_file cols_list resultSTEP1
+let concatColsProcessedSTEP2 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP2
+let resultSTEP2 = _impositionRowsCols concatRowsSTEP2 concatColsProcessedSTEP2-}	
+
+-- board_dim_1 | Bool | left_numbers_from_file rows_list cows_list joined_int_boards resultSTEP
+_genSTEP4 :: Int -> [Int] -> [Int] -> [Int] -> [Int] -> [Int] -> [Char] -> [Char]
+_genSTEP4 _ _ _ _ _ _ [] = []
+_genSTEP4 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list joined_int_boards resultSTEP = _impositionRowsCols (_genericEreasingHouAndWarmAdditional board_dim_1 False left_numbers_from_file rows_list joined_int_boards resultSTEP) (_concatColsProcessed board_dim_1 cols_list (_genericEreasingHouAndWarmAdditional board_dim_1 True up_numbers_from_file cols_list joined_int_boards resultSTEP))
+{-let concatRowsSTEP4 = _genericEreasingHouAndWarmAdditional board_dim_1 False left_numbers_from_file rows_list joined_int_boards resultSTEP--resultSTEP2
+-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
+let concatColsSTEP4 = _genericEreasingHouAndWarmAdditional board_dim_1 True up_numbers_from_file cols_list joined_int_boards resultSTEP --resultSTEP2
+let concatColsProcessedSTEP4 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP4
+let resultSTEP4 = _impositionRowsCols concatRowsSTEP4 concatColsProcessedSTEP4-}
+
+_genSTEP6 :: Int -> [Int] -> [Int] -> [Int] -> [Int] -> [Char] -> [Char]
+_genSTEP6 _ _ _ _ _ [] = []
+_genSTEP6 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list resultSTEP = _impositionRowsCols (_genericCheckIfAllWarmers board_dim_1 False left_numbers_from_file rows_list resultSTEP) (_concatColsProcessed board_dim_1 cols_list (_genericCheckIfAllWarmers board_dim_1 True up_numbers_from_file cols_list resultSTEP))
+{-let concatRowsSTEP6 = _genericCheckIfAllWarmers board_dim_1 False left_numbers_from_file rows_list resultSTEP5
+let concatColsSTEP6 = _genericCheckIfAllWarmers board_dim_1 True up_numbers_from_file cols_list resultSTEP5
+let concatColsProcessedSTEP6 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP6
+let resultSTEP6 = _impositionRowsCols concatRowsSTEP6 concatColsProcessedSTEP6-}
+
+_genSTEP7 :: Int -> [Int] -> [Int] -> [Int] -> [Int] -> [Int] -> [Char] -> [Char]
+_genSTEP7 _ _ _ _ _ _ [] = []
+_genSTEP7 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list joined_int_boards resultSTEP = _impositionRowsCols (_genericEreasingHouAndWarmAdditional board_dim_1 False left_numbers_from_file rows_list joined_int_boards resultSTEP) (_concatColsProcessed board_dim_1 cols_list (_genericEreasingHouAndWarmAdditional board_dim_1 True up_numbers_from_file cols_list joined_int_boards resultSTEP))
+{-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
+let concatRowsSTEP7 = _genericEreasingHouAndWarmAdditional board_dim_1 False left_numbers_from_file rows_list joined_int_boards resultSTEP6
+-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
+let concatColsSTEP7 = _genericEreasingHouAndWarmAdditional board_dim_1 True up_numbers_from_file cols_list joined_int_boards resultSTEP6
+let concatColsProcessedSTEP7 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP7
+let resultSTEP7 = _impositionRowsCols concatRowsSTEP7 concatColsProcessedSTEP7-}
+
+-- end of GEN part
+
+-- the part concerning data prediction
+-- generate all subsets of a given set
+_subsets :: [Int] -> [[Int]]
+_subsets []  = [[]]
+_subsets (x:xs) = _subsets xs ++ map (x:) (_subsets xs) 
+
+-- we've got to analyze each row and compare to number to obtain proper results 								
+-- guessing algorithm
+_tabOf0Index :: [Char] -> Int -> [Int]
+_tabOf0Index [] _ = []
+_tabOf0Index (x:xs) index 
+								| x == '0' = index : _tabOf0Index xs (index + 1)
+								| otherwise = _tabOf0Index xs (index + 1)
+
+_countNumWarmers :: [Int] -> Int
+_countNumWarmers [] = 0
+_countNumWarmers (x:xs) = x + _countNumWarmers xs
+
+_countRealWarmers :: [Char] -> Int
+_countRealWarmers [] = 0
+_countRealWarmers (x:xs) 
+								| x == 'W' = 1 + _countRealWarmers xs
+								| otherwise = 0 + _countRealWarmers xs
+
+_placeWarmers :: Int -> [Int] -> [Char] -> [Char]
+_placeWarmers _ _ [] = []
+_placeWarmers iterator xs (y:ys) 
+								| _checkIfExist xs iterator == True = 'W' : _placeWarmers (iterator + 1) xs ys
+								| otherwise = y : _placeWarmers (iterator + 1) xs ys
+
+_fillLastCells :: [Char] -> [Char]
+_fillLastCells [] = []
+_fillLastCells (x:xs) 
+								| x == '0' = 'X' : _fillLastCells xs
+								| otherwise = x : _fillLastCells xs
+
+-- comparing number at row beginning to warmers placed - if the same, we receive true								
+_checkIfCorrect :: Int -> Int -> Bool
+_checkIfCorrect x y 
+								| x == y = True
+								| otherwise = False
+
+-- 										dimension | row or col | list of el at beginning | list of rows | board
+_genCreationCheckList :: Int -> Bool -> [Int] -> [Int] -> [Char] -> [Bool]	
+_genCreationCheckList _ _ [] [] _ = []		
+_genCreationCheckList dim choice (x:xs) (y:ys) ts = (_checkIfCorrect x (_countWarmersInRow (_columnToRow dim choice y ts))) : (_genCreationCheckList dim choice xs ys ts)						
+
+-- check both lists 
+_genCheckBools :: [Bool] -> [Bool] -> Bool
+_genCheckBools [] [] = True
+_genCheckBools (x:xs) (y:ys) 
+								| x == True && y == True = _genCheckBools xs ys
+								| otherwise = False
+
+_checkIfNeighbourInRow :: [Char] -> Bool
+_checkIfNeighbourInRow [x] = False
+_checkIfNeighbourInRow [] = False
+_checkIfNeighbourInRow (x1:x2:xs) 
+								| ((x1 == x2) && (x1 == 'W')) = True
+								| otherwise = _checkIfNeighbourInRow (x2:xs)
+								
+_checkForResult :: Int -> [Int] -> [Int] -> [Int] -> [Int] -> [[Int]] -> [Char] -> [[Int]]
+_checkForResult _ _ _ _ _ [] _ = []
+_checkForResult board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list (x:xs) ys
+								| ((_genCheckBools (_genCreationCheckList board_dim_1 False left_numbers_from_file rows_list (_fillLastCells (_placeWarmers 0 x ys))) (_genCreationCheckList board_dim_1 True up_numbers_from_file cols_list (_fillLastCells (_placeWarmers 0 x ys)))) == True) = x : (_checkForResult board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list xs ys)						
+								| otherwise = _checkForResult board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list xs ys
+
+_takeElement :: [[Int]] -> [Int]
+_takeElement (x:xs) = x		
+
+_boolToString :: Bool -> String
+_boolToString True = "TRUE"
+_boolToString False = "FALSE"						
+						
+-- we've got to check wheather there is neighbour on board created
+--                      board dimension | board of incrementing indexes | result board provided						
+_checkIfNeighbourInBoard :: Int -> [Int] -> [Char] -> Bool
+_checkIfNeighbourInBoard _ [] _ = False
+_checkIfNeighbourInBoard board_dim_1 (x:xs) ys
+														| (_checkIfNeighbourInRow (_columnToRow board_dim_1 False x ys)) == True = True
+														| (_checkIfNeighbourInRow (_columnToRow board_dim_1 True x ys)) == True = True
+														| otherwise = _checkIfNeighbourInBoard board_dim_1 xs ys
+
+-- here we create board from list of warmers placement indexes and check if has any neighbours - we skip tables which are with neighbours														
+_chooseNotNeighbour :: Int -> [Int] -> [[Int]] -> [Char] -> [Int]
+_chooseNotNeighbour _ _ [] _ = [] 
+_chooseNotNeighbour dim xs (y:ys) zs 					| (_checkIfNeighbourInBoard dim xs (_fillLastCells (_placeWarmers 0 y zs))) == False = y
+														| otherwise = _chooseNotNeighbour dim xs ys zs
+													
+						
+main = do
 	handle <- openFile "input_file.txt" ReadMode
         contents <- hGetContents handle
         let singlewords = lines contents
@@ -313,16 +467,11 @@ main = do
 	
 	
 	{--- STEP0 ereasing rows and columns with 0 number ---}
-	let concatRowsSTEP0 = _genericStep0RowsOrCols board_dim_1 False left_numbers_from_file rows_list startup_char_board
-	let concatColsSTEP0 = _genericStep0RowsOrCols board_dim_1 True up_numbers_from_file cols_list startup_char_board
-	let concatColsProcessedSTEP0 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP0
-	
-	let resultSTEP0 = (_impositionRowsCols concatRowsSTEP0 concatColsProcessedSTEP0)
+	let resultSTEP0 = _genSTEP0 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list startup_char_board
 	
 	-- wages calculation
 	let calculate_wages_housesSTEP0 = (_updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP0)
 	let int_board_with_wagesSTEP0 = (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP0 joined_int_boards)
-	
 	{-
 	print " "
 	print "END OF STEP 0!"
@@ -330,29 +479,18 @@ main = do
 	
 	
 	{--- STEP1 ereasing cells which are on the edges for hauses & placing warmers if numbers at row/col beginning are the same ---}
-	-- First step of project in rows
-	let concatRowsSTEP1 = _genericEreasingHousesAndPlacingWarmers board_dim_1 False left_numbers_from_file rows_list int_board_with_wagesSTEP0 resultSTEP0
-	-- First step of project in columns
-	let concatColsSTEP1 = _genericEreasingHousesAndPlacingWarmers board_dim_1 True up_numbers_from_file cols_list int_board_with_wagesSTEP0 resultSTEP0
-	let concatColsProcessedSTEP1 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP1
-	
-	let resultSTEP1 = _impositionRowsCols concatRowsSTEP1 concatColsProcessedSTEP1
+	let resultSTEP1 = _genSTEP1 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list int_board_with_wagesSTEP0 resultSTEP0
 	
 	-- wages calculation
 	let calculate_wages_housesSTEP1 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP1
 	let int_board_with_wagesSTEP1 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP1 joined_int_boards) resultSTEP1
-	
 	{-print " "
 	print "END OF STEP 1!"
 	print " " -}
 	
 	
-	{--- STEP2 (we' ve got to find out if count of settled warmers is equal to number at the beginning - if yes, other '0' fields will be 'X'): ---}
-	let concatRowsSTEP2 = _genericCheckIfAllWarmers board_dim_1 False left_numbers_from_file rows_list resultSTEP1
-	let concatColsSTEP2 = _genericCheckIfAllWarmers board_dim_1 True up_numbers_from_file cols_list resultSTEP1
-	let concatColsProcessedSTEP2 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP2
-	
-	let resultSTEP2 = _impositionRowsCols concatRowsSTEP2 concatColsProcessedSTEP2
+	{--- STEP2 (we' ve got to find out if count of settled warmers is equal to number at the beginning - if yes, other '0' fields will be 'X'): ---}	
+	let resultSTEP2 = _genSTEP2 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list resultSTEP1
 	
 	-- wages calculation
 	let calculate_wages_housesSTEP2 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP2
@@ -361,95 +499,73 @@ main = do
 	{-print " "
 	print "END OF STEP 2!"
 	print " " -}
+
+	let warmers_to_place = ((_countNumWarmers left_numbers_from_file) - (_countRealWarmers resultSTEP2))
 	
+	let subsets_list = [ t | t <- (_subsets (_tabOf0Index resultSTEP2 0)), length t == warmers_to_place ]
+	
+	let final_warmers_placement = _checkForResult board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list subsets_list resultSTEP2
+	let non_neighbour_prediction = _chooseNotNeighbour board_dim_1 rows_list final_warmers_placement resultSTEP2
+	let resultPrediction = _fillLastCells (_placeWarmers 0 non_neighbour_prediction resultSTEP2)
+	
+	putStrLn "---------------------"
+	putStrLn ""
+	
+	putStrLn (_columnToRow board_dim_1 False 0 resultPrediction)
+	putStrLn (_columnToRow board_dim_1 False 1 resultPrediction)
+	putStrLn (_columnToRow board_dim_1 False 2 resultPrediction)
+	putStrLn (_columnToRow board_dim_1 False 3 resultPrediction)
+	putStrLn (_columnToRow board_dim_1 False 4 resultPrediction)
+	putStrLn (_columnToRow board_dim_1 False 5 resultPrediction)
+	putStrLn (_columnToRow board_dim_1 False 6 resultPrediction)
+	
+	putStrLn "---------------------"
 	
 	{--- STEP3 erease cells at the edges of warmers ---}
-	let resultSTEP3 = _ereaseByWarmers 0 (_ereaseByWarmersList board_dim_1 (_makeWarmersIndexList 0 resultSTEP2)) resultSTEP2	
-	
+	{-let resultSTEP3 = _ereaseByWarmers 0 (_ereaseByWarmersList board_dim_1 (_makeWarmersIndexList 0 resultSTEP2)) resultSTEP2	
 	-- wages calculation
 	let calculate_wages_housesSTEP3 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP3
 	let int_board_with_wagesSTEP3 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP3 joined_int_boards) resultSTEP3
-	
+	-}
 	{-print " "
 	print "END OF STEP 3!"
 	print " " -}
 	
-	
 	{--- STEP4 once again STEP1 ---}
-	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
-	let concatRowsSTEP4 = _genericEreasingHouAndWarmAdditional board_dim_1 False left_numbers_from_file rows_list joined_int_boards resultSTEP3
-	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
-	let concatColsSTEP4 = _genericEreasingHouAndWarmAdditional board_dim_1 True up_numbers_from_file cols_list joined_int_boards resultSTEP3
-	let concatColsProcessedSTEP4 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP4
-	
-	let resultSTEP4 = _impositionRowsCols concatRowsSTEP4 concatColsProcessedSTEP4
-	
+	{-
+	let resultSTEP4 = _genSTEP4 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list joined_int_boards resultSTEP2
 	-- wages calculation
 	let calculate_wages_housesSTEP4 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP4
 	let int_board_with_wagesSTEP4 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP4 joined_int_boards) resultSTEP4
-	
 	{-print " "
 	print "END OF STEP 4!"
 	print " " -}
 	
-	
 	{--- STEP5 checking if we can find over int board 4 value - if so, we can surely place there warmer, because it's the only place where house could have warmer! ---}
 	let resultSTEP5 = _placeIfCellEquals4 int_board_with_wagesSTEP4 resultSTEP4
-	
 	-- wages calculation
 	let calculate_wages_housesSTEP5 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP5
 	let int_board_with_wagesSTEP5 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP5 joined_int_boards) resultSTEP5
-	
 	{-print " "
 	print "END OF STEP 5!"
 	print " " 	-}
 	
-	
-	{--- STEP6 once again STEP2 ---}
-	let concatRowsSTEP6 = _genericCheckIfAllWarmers board_dim_1 False left_numbers_from_file rows_list resultSTEP5
-	let concatColsSTEP6 = _genericCheckIfAllWarmers board_dim_1 True up_numbers_from_file cols_list resultSTEP5
-	let concatColsProcessedSTEP6 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP6
-	
-	let resultSTEP6 = _impositionRowsCols concatRowsSTEP6 concatColsProcessedSTEP6
-	
+	{--- STEP6 once again STEP2 ---}	
+	let resultSTEP6 = _genSTEP6 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list resultSTEP5
 	-- wages calculation
 	let calculate_wages_housesSTEP6 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP6
 	let int_board_with_wagesSTEP6 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP6 joined_int_boards) resultSTEP6
-	
 	{-print " "
 	print "END OF STEP 6!"
 	print " " -}
 	
-	
 	{--- STEP7 once again STEP1 ---}
-	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
-	let concatRowsSTEP7 = _genericEreasingHouAndWarmAdditional board_dim_1 False left_numbers_from_file rows_list joined_int_boards resultSTEP6
-	-- ereasing rows and columns with 0 number & ereasing cells which are on the edges for hauses
-	let concatColsSTEP7 = _genericEreasingHouAndWarmAdditional board_dim_1 True up_numbers_from_file cols_list joined_int_boards resultSTEP6
-	let concatColsProcessedSTEP7 = _concatColsProcessed board_dim_1 cols_list concatColsSTEP7
-	
-	let resultSTEP7 = _impositionRowsCols concatRowsSTEP7 concatColsProcessedSTEP7
-	
+	let resultSTEP7 = _genSTEP7 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list joined_int_boards resultSTEP6
 	-- wages calculation
 	let calculate_wages_housesSTEP7 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP7
 	let int_board_with_wagesSTEP7 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP7 joined_int_boards) resultSTEP7
-	
-	-- print int_board_with_wagesSTEP7
-	    
-
-    -- putStrLn "Done"   
-	putStrLn "Here is the solution:"
-	putStrLn "---------------------"
-	putStrLn ""
-	putStrLn (_columnToRow board_dim_1 False 0 resultSTEP7)
-	putStrLn (_columnToRow board_dim_1 False 1 resultSTEP7)
-	putStrLn (_columnToRow board_dim_1 False 2 resultSTEP7)
-	putStrLn (_columnToRow board_dim_1 False 3 resultSTEP7)
-	putStrLn (_columnToRow board_dim_1 False 4 resultSTEP7)
-	putStrLn (_columnToRow board_dim_1 False 5 resultSTEP7)
-	putStrLn (_columnToRow board_dim_1 False 6 resultSTEP7)
-	putStrLn "---------------------"
-	
+	-- print int_board_with_wagesSTEP7 
+	-}
 	
 	-- providing solution to file
 	putStrLn "Enter name of file for solution:"
@@ -466,7 +582,10 @@ main = do
 	--putStrLn (_columnToRow board_dim_1 False 6 resultSTEP7)
 	putStrLn "Solution saved to file"
 	
+	
 	hClose handle 
 	{-print " "
 	print "END OF STEP 7!"
 	print " " -}
+	
+	

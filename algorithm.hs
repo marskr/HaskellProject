@@ -506,18 +506,18 @@ main = do
 	
 	let final_warmers_placement = _checkForResult board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list subsets_list resultSTEP2
 	let non_neighbour_prediction = _chooseNotNeighbour board_dim_1 rows_list final_warmers_placement resultSTEP2
-	let resultPrediction = _fillLastCells (_placeWarmers 0 non_neighbour_prediction resultSTEP2)
+	let resultPRED = _fillLastCells (_placeWarmers 0 non_neighbour_prediction resultSTEP2)
 	
 	putStrLn "---------------------"
 	putStrLn ""
 	
-	putStrLn (_columnToRow board_dim_1 False 0 resultPrediction)
-	putStrLn (_columnToRow board_dim_1 False 1 resultPrediction)
-	putStrLn (_columnToRow board_dim_1 False 2 resultPrediction)
-	putStrLn (_columnToRow board_dim_1 False 3 resultPrediction)
-	putStrLn (_columnToRow board_dim_1 False 4 resultPrediction)
-	putStrLn (_columnToRow board_dim_1 False 5 resultPrediction)
-	putStrLn (_columnToRow board_dim_1 False 6 resultPrediction)
+	putStrLn (_columnToRow board_dim_1 False 0 resultPRED)
+	putStrLn (_columnToRow board_dim_1 False 1 resultPRED)
+	putStrLn (_columnToRow board_dim_1 False 2 resultPRED)
+	putStrLn (_columnToRow board_dim_1 False 3 resultPRED)
+	putStrLn (_columnToRow board_dim_1 False 4 resultPRED)
+	putStrLn (_columnToRow board_dim_1 False 5 resultPRED)
+	putStrLn (_columnToRow board_dim_1 False 6 resultPRED)
 	
 	putStrLn "---------------------"
 	
@@ -576,12 +576,9 @@ main = do
     
 	if not fileExist then writeFile fileName name else return ()
 	
-	writeFile fileName ("Here is the solution:\n"++(_columnToRow board_dim_1 False 0 resultSTEP7)++"\n"++(_columnToRow board_dim_1 False 1 resultSTEP7)++"\n"++(_columnToRow board_dim_1 False 2 resultSTEP7)++ "\n"++(_columnToRow board_dim_1 False 3 resultSTEP7)++ "\n"++(_columnToRow board_dim_1 False 4 resultSTEP7)++"\n"++(_columnToRow board_dim_1 False 5 resultSTEP7)++"\n"++(_columnToRow board_dim_1 False 6 resultSTEP7))
- 
-	--writeFile fileName (_columnToRow board_dim_1 False 5 resultSTEP7)
-	--putStrLn (_columnToRow board_dim_1 False 6 resultSTEP7)
+	writeFile fileName ("Here is the solution:\n"++(_columnToRow board_dim_1 False 0 resultPRED)++"\n"++(_columnToRow board_dim_1 False 1 resultPRED)++"\n"++(_columnToRow board_dim_1 False 2 resultPRED)++ "\n"++(_columnToRow board_dim_1 False 3 resultPRED)++ "\n"++(_columnToRow board_dim_1 False 4 resultPRED)++"\n"++(_columnToRow board_dim_1 False 5 resultPRED)++"\n"++(_columnToRow board_dim_1 False 6 resultPRED))
+
 	putStrLn "Solution saved to file"
-	
 	
 	hClose handle 
 	{-print " "

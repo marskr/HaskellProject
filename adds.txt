@@ -1,0 +1,48 @@
+
+	
+	{--- STEP3 erease cells at the edges of warmers ---}
+	{-let resultSTEP3 = _ereaseByWarmers 0 (_ereaseByWarmersList board_dim_1 (_makeWarmersIndexList 0 resultSTEP2)) resultSTEP2	
+	-- wages calculation
+	let calculate_wages_housesSTEP3 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP3
+	let int_board_with_wagesSTEP3 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP3 joined_int_boards) resultSTEP3
+	-}
+	{-print " "
+	print "END OF STEP 3!"
+	print " " -}
+	
+	{--- STEP4 once again STEP1 ---}
+	{-
+	let resultSTEP4 = _genSTEP4 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list joined_int_boards resultSTEP2
+	-- wages calculation
+	let calculate_wages_housesSTEP4 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP4
+	let int_board_with_wagesSTEP4 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP4 joined_int_boards) resultSTEP4
+	{-print " "
+	print "END OF STEP 4!"
+	print " " -}
+	
+	{--- STEP5 checking if we can find over int board 4 value - if so, we can surely place there warmer, because it's the only place where house could have warmer! ---}
+	let resultSTEP5 = _placeIfCellEquals4 int_board_with_wagesSTEP4 resultSTEP4
+	-- wages calculation
+	let calculate_wages_housesSTEP5 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP5
+	let int_board_with_wagesSTEP5 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP5 joined_int_boards) resultSTEP5
+	{-print " "
+	print "END OF STEP 5!"
+	print " " 	-}
+	
+	{--- STEP6 once again STEP2 ---}	
+	let resultSTEP6 = _genSTEP6 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list resultSTEP5
+	-- wages calculation
+	let calculate_wages_housesSTEP6 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP6
+	let int_board_with_wagesSTEP6 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP6 joined_int_boards) resultSTEP6
+	{-print " "
+	print "END OF STEP 6!"
+	print " " -}
+	
+	{--- STEP7 once again STEP1 ---}
+	let resultSTEP7 = _genSTEP7 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list joined_int_boards resultSTEP6
+	-- wages calculation
+	let calculate_wages_housesSTEP7 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP7
+	let int_board_with_wagesSTEP7 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP7 joined_int_boards) resultSTEP7
+	-- print int_board_with_wagesSTEP7 
+	-}
+	

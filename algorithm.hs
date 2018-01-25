@@ -4,9 +4,23 @@ import System.IO
 import System.Directory    
 import Control.Monad
 
--- file data extraction from file
-f :: [String] -> [Int]
+-- data extraction from file
+-- Remove punctuation from text String.
+
+removePunc:: String->String
+removePunc []=[]
+removePunc xs = [ x | x <- xs, not (x `elem` "[](),") ]
+
+filterString::[String]->[String]
+filterString []=[]
+filterString (x:xs)=removePunc(x):filterString(xs)
+
+f :: [String] -> [String]
 f = map read
+
+f2::[String]->[Int]
+f2=map read
+
 
 byTwos :: [a] -> [(a,a)]
 byTwos [] = []
@@ -433,18 +447,26 @@ main = do
 	handle <- openFile "input_file.txt" ReadMode
         contents <- hGetContents handle
         let singlewords = lines contents
-        let first_line = f (words (singlewords!!0))
-        let second_line = f (words (singlewords!!1))
-        let tuple_from_file2 = byTwos ( f (words (singlewords!!2)))		
-       
+        let first_line =  (words (singlewords!!0))
+        let second_line =  (words (singlewords!!1))
+        let tuple_from_file2 =  (words (singlewords!!2))
+
+        let first=  f2 (filterString first_line)
+        let second= f2 (filterString second_line)
+        let tuples=byTwos( f2 (filterString tuple_from_file2))
+   
 	
-	let tuple_from_file = tuple_from_file2
-	let left_numbers_from_file = first_line
-	let up_numbers_from_file = second_line 
+	let tuple_from_file = tuples
+	let left_numbers_from_file = first
+	let up_numbers_from_file = second 
 	
 	--let tuple_from_file = [(0,4),(1,1),(1,3),(1,5),(2,2),(3,0),(4,2),(5,5)]
 	--let left_numbers_from_file = [2,0,3,0,2,1]
 	--let up_numbers_from_file = [1,1,1,2,0,3] 
+	
+	--let tuple_from_file = [(0,4),(1,1),(2,5),(3,1),(4,0),(4,3),(4,4),(5,2),(5,4)]
+	--let left_numbers_from_file = [1,2,0,3,0,3]
+	--let up_numbers_from_file = [2,1,1,2,1,2] 
 	
 	--let tuple_from_file = [(0,4),(3,1),(4,3),(5,0),(5,2),(5,4),(5,5),(5,6),(6,4)]
 	--let left_numbers_from_file = [1,0,1,1,3,1,2]
@@ -520,53 +542,6 @@ main = do
 	putStrLn (_columnToRow board_dim_1 False 6 resultPRED)
 	
 	putStrLn "---------------------"
-	
-	{--- STEP3 erease cells at the edges of warmers ---}
-	{-let resultSTEP3 = _ereaseByWarmers 0 (_ereaseByWarmersList board_dim_1 (_makeWarmersIndexList 0 resultSTEP2)) resultSTEP2	
-	-- wages calculation
-	let calculate_wages_housesSTEP3 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP3
-	let int_board_with_wagesSTEP3 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP3 joined_int_boards) resultSTEP3
-	-}
-	{-print " "
-	print "END OF STEP 3!"
-	print " " -}
-	
-	{--- STEP4 once again STEP1 ---}
-	{-
-	let resultSTEP4 = _genSTEP4 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list joined_int_boards resultSTEP2
-	-- wages calculation
-	let calculate_wages_housesSTEP4 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP4
-	let int_board_with_wagesSTEP4 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP4 joined_int_boards) resultSTEP4
-	{-print " "
-	print "END OF STEP 4!"
-	print " " -}
-	
-	{--- STEP5 checking if we can find over int board 4 value - if so, we can surely place there warmer, because it's the only place where house could have warmer! ---}
-	let resultSTEP5 = _placeIfCellEquals4 int_board_with_wagesSTEP4 resultSTEP4
-	-- wages calculation
-	let calculate_wages_housesSTEP5 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP5
-	let int_board_with_wagesSTEP5 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP5 joined_int_boards) resultSTEP5
-	{-print " "
-	print "END OF STEP 5!"
-	print " " 	-}
-	
-	{--- STEP6 once again STEP2 ---}	
-	let resultSTEP6 = _genSTEP6 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list resultSTEP5
-	-- wages calculation
-	let calculate_wages_housesSTEP6 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP6
-	let int_board_with_wagesSTEP6 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP6 joined_int_boards) resultSTEP6
-	{-print " "
-	print "END OF STEP 6!"
-	print " " -}
-	
-	{--- STEP7 once again STEP1 ---}
-	let resultSTEP7 = _genSTEP7 board_dim_1 left_numbers_from_file up_numbers_from_file rows_list cols_list joined_int_boards resultSTEP6
-	-- wages calculation
-	let calculate_wages_housesSTEP7 = _updateAllIntBoardByCheckOptions board_dim_1 0 house_index_list resultSTEP7
-	let int_board_with_wagesSTEP7 = _ereaseFromIntIfOccupied (_updateWageBoardByOptions board_dim_1 house_index_list calculate_wages_housesSTEP7 joined_int_boards) resultSTEP7
-	-- print int_board_with_wagesSTEP7 
-	-}
-	
 	-- providing solution to file
 	putStrLn "Enter name of file for solution:"
 	name <- getLine
